@@ -194,7 +194,7 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   children: [
                     const SizedBox(
-                        height: 20),
+                        height: 60),
                     CarouselSlider(
                       options:
                           CarouselOptions(
