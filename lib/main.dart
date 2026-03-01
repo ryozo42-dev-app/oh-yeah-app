@@ -61,9 +61,9 @@ class _MainNavigationScreenState
 
   void _onItemTapped(int index) {
     if (index == 2) {
-      _launchUrl('https://www.facebook.com/');
+      _launchUrl('https://www.facebook.com/ohyeahmihama');
     } else if (index == 3) {
-      _launchUrl('https://www.instagram.com/');
+      _launchUrl('https://www.instagram.com/oh_yeah_mihama/');
     } else {
       setState(() {
         if (index == 1) {
