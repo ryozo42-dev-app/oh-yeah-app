@@ -1,1 +1,55 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"oh-yeah-9fdc6","appId":"1:642657130095:android:2df826001b1c10f51c9f9a","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"oh-yeah-9fdc6","appId":"1:642657130095:ios:c293fa87396464c61c9f9a","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"macos":{"default":{"projectId":"oh-yeah-9fdc6","appId":"1:642657130095:ios:bf92c2ec330c12991c9f9a","uploadDebugSymbols":false,"fileOutput":"macos/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"oh-yeah-9fdc6","configurations":{"android":"1:642657130095:android:2df826001b1c10f51c9f9a","ios":"1:642657130095:ios:c293fa87396464c61c9f9a","macos":"1:642657130095:ios:bf92c2ec330c12991c9f9a","web":"1:642657130095:web:a0daf83c3a80c4311c9f9a","windows":"1:642657130095:web:2118a92adb2f9e251c9f9a"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "oh-yeah-9fdc6",
+          "appId": "1:642657130095:android:2df826001b1c10f51c9f9a",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "oh-yeah-9fdc6",
+          "appId": "1:642657130095:ios:c293fa87396464c61c9f9a",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "oh-yeah-9fdc6",
+          "appId": "1:642657130095:ios:bf92c2ec330c12991c9f9a",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "oh-yeah-9fdc6",
+          "configurations": {
+            "android": "1:642657130095:android:2df826001b1c10f51c9f9a",
+            "ios": "1:642657130095:ios:c293fa87396464c61c9f9a",
+            "macos": "1:642657130095:ios:bf92c2ec330c12991c9f9a",
+            "web": "1:642657130095:web:a0daf83c3a80c4311c9f9a",
+            "windows": "1:642657130095:web:2118a92adb2f9e251c9f9a"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+      }
+  ]
+}

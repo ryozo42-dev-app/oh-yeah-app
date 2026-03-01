@@ -22,12 +22,20 @@ dependencies:
   firebase_auth: ^5.1.0
   cloud_firestore: ^5.1.0
   firebase_storage: ^12.1.0
+  firebase_messaging: ^15.2.10
   intl: ^0.20.2
   google_maps_flutter: ^2.14.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.13.1
+  flutter_lints: ^4.0.0
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/fire/icon.png"
   flutter_lints: ^4.0.0
 
 flutter:

@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,13 +7,27 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 import 'firebase_options.dart';
 
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print("🔔 Background message: ${message.messageId}");
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  FirebaseMessaging.onBackgroundMessage(
+    _firebaseMessagingBackgroundHandler,
+  );
+
   runApp(const MyApp());
 }
+
+/* ===========================
+   MAIN
+=========================== */
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -147,6 +162,31 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _current = 0;
+  final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    requestPermission();
+    getToken();
+    FirebaseMessaging.instance.subscribeToTopic("news");
+  }
+
+  void requestPermission() async {
+    NotificationSettings settings =
+        await _messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    print('🔔 Permission: ${settings.authorizationStatus}');
+  }
+
+  void getToken() async {
+    String? token = await _messaging.getToken();
+    print("🔥 FCM Token: $token");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -170,11 +210,19 @@ class _HomePageState extends State<HomePage> {
               QuerySnapshot>(
             stream: FirebaseFirestore
                 .instance
-                .collection('slider_images')
-                
-                .snapshots(),
+               .collection('slider_images')
+.snapshots(),
             builder:
                 (context, snapshot) {
+              print("ConnectionState: ${snapshot.connectionState}");
+              print("HasData: ${snapshot.hasData}");
+              print("HasError: ${snapshot.hasError}");
+
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text("ERROR: ${snapshot.error}"),
+                );
+              }
               if (!snapshot.hasData) {
                 return const Center(
                     child:
@@ -183,6 +231,7 @@ class _HomePageState extends State<HomePage> {
 
               final docs =
                   snapshot.data!.docs;
+              print("Docs length: ${docs.length}");
 
               if (docs.isEmpty) {
                 return const Center(
@@ -354,147 +403,182 @@ class MenuPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF3E2723),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: onBack,
-          ),
-          title: const Text(
-            'OUR MENU',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          bottom: const TabBar(
-            indicatorColor: Colors.white,
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
-            tabs: [
-              Tab(
-                icon: Icon(Icons.local_drink),
-                text: 'DRINK',
-              ),
-              Tab(
-                icon: Icon(Icons.restaurant),
-                text: 'FOOD',
-              ),
-            ],
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF3E2723),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: onBack,
         ),
-        body: const TabBarView(
+        title: const Text(
+          "MENU",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ),
+      body: DefaultTabController(
+        length: 2,
+        child: Column(
           children: [
-            _MenuCategoryList(category: 'DRINK'),
-            _MenuCategoryList(category: 'FOOD'),
+            const TabBar(
+              labelColor: Colors.brown,
+              tabs: [
+                Tab(text: "FOOD"),
+                Tab(text: "DRINK"),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  buildFoodMenu(),
+                  buildDrinkMenu(),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
-}
 
-class _MenuCategoryList
-    extends StatelessWidget {
-  final String category;
-
-  const _MenuCategoryList(
-      {required this.category});
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<
-        QuerySnapshot>(
-      stream: FirebaseFirestore
-          .instance
-          .collection('oh-yeah-001')
-          .where('category',
-              isEqualTo: category)
+  Widget buildFoodMenu() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('menu_items')
+          .where('isActive', isEqualTo: true)
+          .where('category', isEqualTo: 'food')
+          .orderBy('order')
           .snapshots(),
-      builder:
-          (context, snapshot) {
+      builder: (context, snapshot) {
+        print("ConnectionState: ${snapshot.connectionState}");
+        print("HasData: ${snapshot.hasData}");
+        print("HasError: ${snapshot.hasError}");
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Text("ERROR: ${snapshot.error}"),
+          );
+        }
         if (!snapshot.hasData) {
-          return const Center(
-              child:
-                  CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
 
-        final docs =
-            snapshot.data!.docs;
+        final items = snapshot.data!.docs;
+        print("Docs length: ${items.length}");
 
         return ListView.builder(
-          padding:
-              const EdgeInsets.all(
-                  15),
-          itemCount: docs.length,
-          itemBuilder:
-              (context, index) {
-            final data =
-                docs[index].data()
-                    as Map<
-                        String,
-                        dynamic>;
-            final String? imageUrl = data['imageUrl'] as String?;
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final data = items[index].data() as Map<String, dynamic>;
+            final String imageUrl = data['imageUrl'] ?? '';
+            final String name = data['name']?.toString() ?? '';
+            final String price = data['price']?.toString() ?? '';
 
             return Card(
-              margin:
-                  const EdgeInsets
-                      .only(
-                          bottom: 20),
-              shape:
-                  RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius
-                        .circular(15),
-              ),
+              margin: const EdgeInsets.only(bottom: 20),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
               child: Column(
+                mainAxisSize: MainAxisSize.min, // コンテンツのサイズに合わせる
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (imageUrl !=
-                      null && imageUrl.isNotEmpty)
-                    Image.network(
-                      imageUrl,
-                      height: 200,
-                      width: double
-                          .infinity,
-                      fit: BoxFit
-                          .cover,
+                  if (imageUrl.isNotEmpty)
+                    ClipRRect(
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+                      child: Image.network(
+                        imageUrl,
+                        height: 200, // 高さを固定
+                        width: double.infinity,
+                        fit: BoxFit.cover, // 画像を枠内に収める（はみ出し防止）
+                      ),
                     ),
+
                   Padding(
-                    padding:
-                        const EdgeInsets
-                            .all(15),
+                    padding: const EdgeInsets.all(15),
                     child: Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment
-                              .spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          data['name'] ??
-                              '',
-                          style:
-                              const TextStyle(
-                            fontSize: 18,
-                            fontWeight:
-                                FontWeight
-                                    .bold,
-                            color: Colors
-                                .brown,
-                          ),
+                          name,
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown),
                         ),
                         Text(
-                          '¥${data['price'] ?? ''}',
-                          style:
-                              const TextStyle(
-                            fontSize: 16,
-                            fontWeight:
-                                FontWeight
-                                    .bold,
-                            color: Colors
-                                .brown,
-                          ),
+                          '¥$price',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.brown),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget buildDrinkMenu() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('menu_items')
+          .where('isActive', isEqualTo: true)
+          .where('category', isEqualTo: 'drink')
+          .orderBy('order')
+          .snapshots(),
+      builder: (context, snapshot) {
+        print("ConnectionState: ${snapshot.connectionState}");
+        print("HasData: ${snapshot.hasData}");
+        print("HasError: ${snapshot.hasError}");
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Text("ERROR: ${snapshot.error}"),
+          );
+        }
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final items = snapshot.data!.docs;
+        print("Docs length: ${items.length}");
+
+        return ListView.builder(
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final data = items[index].data() as Map<String, dynamic>;
+            final String imageUrl = data['imageUrl'] ?? '';
+            final String name = data['name']?.toString() ?? '';
+            final String price = data['price']?.toString() ?? '';
+
+            return Card(
+              margin: const EdgeInsets.only(bottom: 20),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              child: Column(
+                mainAxisSize: MainAxisSize.min, // コンテンツのサイズに合わせる
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (imageUrl.isNotEmpty)
+                    ClipRRect(
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+                      child: Image.network(
+                        imageUrl,
+                        height: 200, // 高さを固定
+                        width: double.infinity,
+                        fit: BoxFit.cover, // 画像を枠内に収める（はみ出し防止）
+                      ),
+                    ),
+
+                  Padding(
+                    padding: const EdgeInsets.all(15),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          name,
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown),
+                        ),
+                        Text(
+                          '¥$price',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.brown),
                         ),
                       ],
                     ),
@@ -520,14 +604,6 @@ class NewsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dummyNews = [
-      {
-        'title': '新メニュー登場',
-        'content': '春の限定メニュー開始！',
-        'date': DateTime.now(),
-      }
-    ];
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor:
@@ -540,27 +616,193 @@ class NewsPage extends StatelessWidget {
         title: const Text(
           'NEWS',
           style: TextStyle(
-              color: Colors.white),
+              color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
-      body: ListView.builder(
-        itemCount:
-            dummyNews.length,
-        itemBuilder:
-            (context, index) {
-          final item =
-              dummyNews[index];
-          return ListTile(
-            title:
-                Text(item['title']?.toString() ?? ''),
-            subtitle: Text(
-                DateFormat(
-                        'yyyy.MM.dd')
-                    .format(
-                        item['date']
-                            as DateTime)),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('news')
+            .where('isPublished', isEqualTo: true)
+            .orderBy('date', descending: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          print("ConnectionState: ${snapshot.connectionState}");
+          print("HasData: ${snapshot.hasData}");
+          print("HasError: ${snapshot.hasError}");
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Text("ERROR: ${snapshot.error}"),
+            );
+          }
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final docs = snapshot.data!.docs;
+          print("Docs length: ${docs.length}");
+          if (docs.isEmpty) {
+            return const Center(child: Text('お知らせはありません'));
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: docs.length,
+            itemBuilder: (context, index) {
+              final data = docs[index].data() as Map<String, dynamic>;
+              final String title = data['title'] ?? 'No Title';
+              final String content = data['content'] ?? '';
+              final Timestamp? timestamp = data['date'] as Timestamp?;
+              final DateTime date = timestamp?.toDate() ?? DateTime.now();
+              final String? imageUrl =
+                  data.containsKey('imageUrl') ? data['imageUrl'] as String? : null;
+              final String dateStr = DateFormat('yyyy.MM.dd').format(date);
+
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => NewsDetailPage(
+                        title: title,
+                        content: content,
+                        date: date,
+                        imageUrl: imageUrl,
+                      ),
+                    ),
+                  );
+                },
+                child: Card(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (imageUrl != null && imageUrl.isNotEmpty)
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.network(
+                            imageUrl,
+                            width: double.infinity,
+                            fit: BoxFit.fitWidth,
+                          ),
+                        ),
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              dateStr,
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 12,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              title,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF3E2723),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           );
         },
+      ),
+    );
+  }
+}
+
+class NewsDetailPage extends StatelessWidget {
+  final String title;
+  final String content;
+  final DateTime date;
+  final String? imageUrl;
+
+  const NewsDetailPage({
+    super.key,
+    required this.title,
+    required this.content,
+    required this.date,
+    this.imageUrl,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final String dateStr = DateFormat('yyyy.MM.dd').format(date);
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF3E2723),
+        title: const Text(
+          'NEWS DETAIL',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (imageUrl != null && imageUrl!.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.network(
+                  imageUrl!,
+                  width: double.infinity,
+                  fit: BoxFit.fitWidth,
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    dateStr,
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF3E2723),
+                    ),
+                  ),
+                  const Divider(height: 40, thickness: 1),
+                  Text(
+                    content,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      height: 1.6,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
