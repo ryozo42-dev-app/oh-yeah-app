@@ -405,6 +405,7 @@ class MenuPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         backgroundColor: const Color(0xFF3E2723),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -421,16 +422,16 @@ class MenuPage extends StatelessWidget {
           children: [
             const TabBar(
               labelColor: Colors.brown,
-              tabs: [
-                Tab(text: "FOOD"),
-                Tab(text: "DRINK"),
+              tabs: const [
+                Tab(text: "Drink"),
+                Tab(text: "Food"),
               ],
             ),
             Expanded(
               child: TabBarView(
                 children: [
-                  buildFoodMenu(),
                   buildDrinkMenu(),
+                  buildFoodMenu(),
                 ],
               ),
             ),
@@ -466,6 +467,7 @@ class MenuPage extends StatelessWidget {
         print("Docs length: ${items.length}");
 
         return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           itemCount: items.length,
           itemBuilder: (context, index) {
             final data = items[index].data() as Map<String, dynamic>;
@@ -473,42 +475,43 @@ class MenuPage extends StatelessWidget {
             final String name = data['name']?.toString() ?? '';
             final String price = data['price']?.toString() ?? '';
 
-            return Card(
-              margin: const EdgeInsets.only(bottom: 20),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-              child: Column(
-                mainAxisSize: MainAxisSize.min, // コンテンツのサイズに合わせる
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (imageUrl.isNotEmpty)
-                    ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
-                      child: Image.network(
-                        imageUrl,
-                        height: 200, // 高さを固定
-                        width: double.infinity,
-                        fit: BoxFit.cover, // 画像を枠内に収める（はみ出し防止）
-                      ),
-                    ),
-
-                  Padding(
-                    padding: const EdgeInsets.all(15),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          name,
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown),
-                        ),
-                        Text(
-                          '¥$price',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.brown),
-                        ),
-                      ],
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 🔥 画像
+                if (imageUrl.isNotEmpty)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.network(
+                      imageUrl,
+                      width: double.infinity,
+                      height: 220,
+                      fit: BoxFit.cover,
                     ),
                   ),
-                ],
-              ),
+                const SizedBox(height: 16),
+                // 🔥 タイトル
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // 🔥 価格
+                Text(
+                  "¥$price",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.brown,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const Divider(),
+                const SizedBox(height: 24),
+              ],
             );
           },
         );
@@ -542,6 +545,7 @@ class MenuPage extends StatelessWidget {
         print("Docs length: ${items.length}");
 
         return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           itemCount: items.length,
           itemBuilder: (context, index) {
             final data = items[index].data() as Map<String, dynamic>;
@@ -549,42 +553,43 @@ class MenuPage extends StatelessWidget {
             final String name = data['name']?.toString() ?? '';
             final String price = data['price']?.toString() ?? '';
 
-            return Card(
-              margin: const EdgeInsets.only(bottom: 20),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-              child: Column(
-                mainAxisSize: MainAxisSize.min, // コンテンツのサイズに合わせる
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (imageUrl.isNotEmpty)
-                    ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
-                      child: Image.network(
-                        imageUrl,
-                        height: 200, // 高さを固定
-                        width: double.infinity,
-                        fit: BoxFit.cover, // 画像を枠内に収める（はみ出し防止）
-                      ),
-                    ),
-
-                  Padding(
-                    padding: const EdgeInsets.all(15),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          name,
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown),
-                        ),
-                        Text(
-                          '¥$price',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.brown),
-                        ),
-                      ],
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 🔥 画像
+                if (imageUrl.isNotEmpty)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.network(
+                      imageUrl,
+                      width: double.infinity,
+                      height: 220,
+                      fit: BoxFit.cover,
                     ),
                   ),
-                ],
-              ),
+                const SizedBox(height: 16),
+                // 🔥 タイトル
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // 🔥 価格
+                Text(
+                  "¥$price",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.brown,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const Divider(),
+                const SizedBox(height: 24),
+              ],
             );
           },
         );
