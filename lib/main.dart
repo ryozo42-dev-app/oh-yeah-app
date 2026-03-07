@@ -28,7 +28,6 @@ void main() async {
    MAIN
 =========================== */
 
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -243,7 +242,7 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   children: [
                     const SizedBox(
-                        height: 60),
+                        height: 35),
                     CarouselSlider(
                       options:
                           CarouselOptions(
@@ -265,6 +264,12 @@ class _HomePageState extends State<HomePage> {
                                 as Map<
                                     String,
                                     dynamic>;
+                        // 画像URLがない場合の安全策
+                        final imageUrl = data['imageUrl'] as String?;
+                        if (imageUrl == null || imageUrl.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+
                         return ClipRRect(
                           borderRadius:
                               BorderRadius
@@ -272,7 +277,7 @@ class _HomePageState extends State<HomePage> {
                                       20),
                           child:
                               Image.network(
-                            data['imageUrl'],
+                            imageUrl,
                             fit: BoxFit
                                 .cover,
                             width: double
@@ -303,9 +308,9 @@ class _HomePageState extends State<HomePage> {
                                   shape:
                                       BoxShape
                                           .circle,
-                                  color: Colors.brown.withValues(
-  alpha: _current == e.key ? 0.9 : 0.4,
-),
+                                  color: _current == e.key
+                                      ? Colors.brown.withOpacity(0.9)
+                                      : Colors.brown.withOpacity(0.4),
                                 ),
                               ))
                           .toList(),
@@ -396,10 +401,55 @@ class _HomePageState extends State<HomePage> {
    MENU PAGE
 =========================== */
 
-class MenuPage extends StatelessWidget {
+class MenuPage extends StatefulWidget {
   final VoidCallback onBack;
 
   const MenuPage({super.key, required this.onBack});
+
+  @override
+  State<MenuPage> createState() => _MenuPageState();
+}
+
+class _MenuPageState extends State<MenuPage> {
+  String selectedCategory = "ALL";
+  List<String> drinkCategories = ["ALL"];
+
+  @override
+  void initState() {
+    super.initState();
+    loadCategories();
+  }
+
+  Future<void> loadCategories() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('menu_items')
+          .where('category', isEqualTo: 'drink')
+          .get();
+
+      final categories = snapshot.docs
+          .map((doc) {
+            final data = doc.data();
+            return data.containsKey('drinkCategory')
+                ? data['drinkCategory'].toString()
+                : null;
+          })
+          .where((e) => e != null)
+          .cast<String>()
+          .toSet()
+          .toList();
+
+      categories.sort();
+
+      if (mounted) {
+        setState(() {
+          drinkCategories = ["ALL", ...categories];
+        });
+      }
+    } catch (e) {
+      print("Error loading categories: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -409,7 +459,7 @@ class MenuPage extends StatelessWidget {
         backgroundColor: const Color(0xFF3E2723),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: onBack,
+          onPressed: widget.onBack,
         ),
         title: const Text(
           "MENU",
@@ -422,7 +472,9 @@ class MenuPage extends StatelessWidget {
           children: [
             const TabBar(
               labelColor: Colors.brown,
-              tabs: const [
+              unselectedLabelColor: Colors.black54,
+              indicatorColor: Colors.brown,
+              tabs: [
                 Tab(text: "Drink"),
                 Tab(text: "Food"),
               ],
@@ -441,6 +493,134 @@ class MenuPage extends StatelessWidget {
     );
   }
 
+  Widget buildDrinkMenu() {
+    Query query = FirebaseFirestore.instance
+        .collection('menu_items')
+        .where('isActive', isEqualTo: true)
+        .where('category', isEqualTo: 'drink');
+
+    if (selectedCategory != "ALL") {
+      query = query.where('drinkCategory', isEqualTo: selectedCategory);
+    }
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: DropdownButton<String>(
+            value: selectedCategory,
+            isExpanded: true,
+            alignment: Alignment.center,
+            items: drinkCategories.map((cat) {
+              return DropdownMenuItem(
+                value: cat,
+                child: Center(
+                  child: Text(
+                    cat,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                selectedCategory = value!;
+              });
+            },
+          ),
+        ),
+        Expanded(
+          child: StreamBuilder<QuerySnapshot>(
+            stream: query.orderBy('order').snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Center(child: Text("ERROR: ${snapshot.error}"));
+              }
+
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              final docs = snapshot.data!.docs;
+
+              if (docs.isEmpty) {
+                return const Center(
+                  child: Text("メニューがありません"),
+                );
+              }
+
+              return ListView.builder(
+                itemCount: docs.length,
+                itemBuilder: (context, index) {
+                  final data = docs[index].data() as Map<String, dynamic>;
+
+                  return Container(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        )
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              data['name']?.toString() ?? 'No Name',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              "¥${data['price']?.toString() ?? '-'}",
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          data['name_en']?.toString() ?? "",
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          data['description'] ?? "",
+                          style: const TextStyle(
+                            fontSize: 18,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget buildFoodMenu() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -450,146 +630,108 @@ class MenuPage extends StatelessWidget {
           .orderBy('order')
           .snapshots(),
       builder: (context, snapshot) {
-        print("ConnectionState: ${snapshot.connectionState}");
-        print("HasData: ${snapshot.hasData}");
-        print("HasError: ${snapshot.hasError}");
 
         if (snapshot.hasError) {
-          return Center(
-            child: Text("ERROR: ${snapshot.error}"),
-          );
+          return Center(child: Text("ERROR: ${snapshot.error}"));
         }
+
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final items = snapshot.data!.docs;
-        print("Docs length: ${items.length}");
+        final docs = snapshot.data!.docs;
 
         return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          itemCount: items.length,
+          padding: const EdgeInsets.all(16),
+          itemCount: docs.length,
           itemBuilder: (context, index) {
-            final data = items[index].data() as Map<String, dynamic>;
-            final String imageUrl = data['imageUrl'] ?? '';
-            final String name = data['name']?.toString() ?? '';
-            final String price = data['price']?.toString() ?? '';
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 🔥 画像
-                if (imageUrl.isNotEmpty)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Image.network(
-                      imageUrl,
-                      width: double.infinity,
-                      height: 220,
-                      fit: BoxFit.cover,
+            final data = docs[index].data() as Map<String, dynamic>;
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
+                  /// 画像
+                  if (data['imageUrl'] != null && data['imageUrl'] != "")
+                    ClipRRect(
+                      borderRadius: BorderRadius.zero,
+                      child: Image.network(
+                        data['imageUrl'],
+                        width: double.infinity,
+                        height: 180,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+
+                        /// 日本語 + 価格
+                        Row(
+                          mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              data['name'] ?? "",
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              "¥${data['price']}",
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 6),
+
+                        /// 英語
+                        Text(
+                          data['name_en'] ?? "",
+                          style: const TextStyle(
+                            fontSize: 18,
+                            color: Colors.black87,
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        /// 説明
+                        Text(
+                          data['description'] ?? "",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black54,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                const SizedBox(height: 16),
-                // 🔥 タイトル
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // 🔥 価格
-                Text(
-                  "¥$price",
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.brown,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                const Divider(),
-                const SizedBox(height: 24),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Widget buildDrinkMenu() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('menu_items')
-          .where('isActive', isEqualTo: true)
-          .where('category', isEqualTo: 'drink')
-          .orderBy('order')
-          .snapshots(),
-      builder: (context, snapshot) {
-        print("ConnectionState: ${snapshot.connectionState}");
-        print("HasData: ${snapshot.hasData}");
-        print("HasError: ${snapshot.hasError}");
-
-        if (snapshot.hasError) {
-          return Center(
-            child: Text("ERROR: ${snapshot.error}"),
-          );
-        }
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        final items = snapshot.data!.docs;
-        print("Docs length: ${items.length}");
-
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          itemCount: items.length,
-          itemBuilder: (context, index) {
-            final data = items[index].data() as Map<String, dynamic>;
-            final String imageUrl = data['imageUrl'] ?? '';
-            final String name = data['name']?.toString() ?? '';
-            final String price = data['price']?.toString() ?? '';
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 🔥 画像
-                if (imageUrl.isNotEmpty)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Image.network(
-                      imageUrl,
-                      width: double.infinity,
-                      height: 220,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                const SizedBox(height: 16),
-                // 🔥 タイトル
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // 🔥 価格
-                Text(
-                  "¥$price",
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.brown,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                const Divider(),
-                const SizedBox(height: 24),
-              ],
+                ],
+              ),
             );
           },
         );
@@ -611,6 +753,7 @@ class NewsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         backgroundColor:
             const Color(0xFF3E2723),
         leading: IconButton(
@@ -686,32 +829,44 @@ class NewsPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+
+                      /// 画像
                       if (imageUrl != null && imageUrl.isNotEmpty)
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(16),
+                          ),
                           child: Image.network(
                             imageUrl,
                             width: double.infinity,
-                            fit: BoxFit.fitWidth,
+                            fit: BoxFit.cover,
                           ),
                         ),
+
+                      /// テキスト
                       Padding(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(14),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+
+                            /// 日付
                             Text(
                               dateStr,
-                              style: const TextStyle(
-                                color: Colors.grey,
-                                fontSize: 12,
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
+
                             const SizedBox(height: 6),
+
+                            /// タイトル
                             Text(
                               title,
                               style: const TextStyle(
-                                fontSize: 18,
+                                fontSize: 20,
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xFF3E2723),
                               ),
@@ -751,6 +906,7 @@ class NewsDetailPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         backgroundColor: const Color(0xFF3E2723),
         title: const Text(
           'NEWS DETAIL',
