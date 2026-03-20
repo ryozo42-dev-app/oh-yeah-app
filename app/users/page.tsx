@@ -1,8 +1,304 @@
-export default function Users() {
-  return (
-    <main>
-      <h1>ユーザー管理</h1>
-      <p>ユーザー一覧</p>
-    </main>
-  );
+"use client"
+
+import AuthGuard from "../../components/AuthGuard"
+import { useEffect,useState } from "react"
+import { createUserWithEmailAndPassword } from "firebase/auth"
+import { auth,db } from "../../lib/firebase"
+
+import {
+collection,
+getDocs,
+doc,
+setDoc,
+deleteDoc
+} from "firebase/firestore"
+
+type User={
+id:string
+name:string
+email:string
+role:string
+}
+
+export default function Users(){
+
+const [users,setUsers]=useState<User[]>([])
+const [showAdd,setShowAdd]=useState(false)
+
+const [newUser,setNewUser]=useState({
+name:"",
+email:"",
+password:"",
+role:"admin"
+})
+
+/* -----------------------
+load users
+----------------------- */
+
+useEffect(()=>{
+
+const load=async()=>{
+
+const snap=await getDocs(collection(db,"users"))
+
+const list=snap.docs.map(d=>({
+id:d.id,
+...d.data()
+})) as User[]
+
+setUsers(list)
+
+}
+
+load()
+
+},[])
+
+
+// -----------------------
+// add user
+// -----------------------
+
+const addUser = async()=>{
+
+try{
+
+const cred = await createUserWithEmailAndPassword(
+auth,
+newUser.email,
+newUser.password
+)
+
+const uid = cred.user.uid
+
+await setDoc(doc(db,"users",uid),{
+
+name:newUser.name,
+email:newUser.email,
+role:newUser.role,
+createdAt:new Date()
+
+})
+
+setUsers([
+...users,
+{
+id:uid,
+name:newUser.name,
+email:newUser.email,
+role:newUser.role
+}
+])
+
+setShowAdd(false)
+
+}catch(e:any){
+
+console.error(e)
+alert(e.message)
+
+}
+
+}
+
+
+// -----------------------
+// delete user
+// -----------------------
+
+const deleteUser = async(id:string)=>{
+
+if(!confirm("削除しますか？")) return
+
+await deleteDoc(doc(db,"users",id))
+
+setUsers(users.filter(u=>u.id!==id))
+
+}
+
+
+/* =====================
+UI
+===================== */
+
+return(
+
+<AuthGuard>
+
+<div style={{padding:"40px"}}>
+
+<h1 style={{textAlign:"center"}}>Users管理</h1>
+
+<table
+style={{
+width:"100%",
+borderCollapse:"collapse",
+background:"#fff",
+marginTop:"30px"
+}}
+>
+
+<thead>
+
+<tr style={{background:"#ddd"}}>
+
+<th style={{border:"1px solid #ccc"}}>名前</th>
+<th style={{border:"1px solid #ccc"}}>メール</th>
+<th style={{border:"1px solid #ccc"}}>権限</th>
+<th style={{border:"1px solid #ccc"}}>操作</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{users.map(u=>(
+
+<tr key={u.id}>
+
+<td style={{border:"1px solid #ddd",padding:"8px"}}>
+{u.name}
+</td>
+
+<td style={{border:"1px solid #ddd",padding:"8px"}}>
+{u.email}
+</td>
+
+<td style={{border:"1px solid #ddd",padding:"8px"}}>
+{u.role}
+</td>
+
+<td style={{border:"1px solid #ddd",padding:"8px"}}>
+
+<button onClick={()=>deleteUser(u.id)}>
+削除
+</button>
+
+</td>
+
+</tr>
+
+))}
+
+</tbody>
+
+</table>
+
+
+<div style={{textAlign:"center",marginTop:"30px"}}>
+
+<button
+style={{
+background:"#7b5a36",
+color:"#fff",
+padding:"10px 20px"
+}}
+onClick={()=>setShowAdd(true)}
+>
+ユーザー追加
+</button>
+
+</div>
+
+
+{/* 追加モーダル */}
+
+{showAdd && (
+
+<div style={{
+position:"fixed",
+top:0,
+left:0,
+width:"100%",
+height:"100%",
+background:"rgba(0,0,0,0.4)",
+display:"flex",
+alignItems:"center",
+justifyContent:"center"
+}}>
+
+<div style={{
+background:"#fff",
+padding:"25px",
+borderRadius:"8px",
+width:"400px"
+}}>
+
+<h3>ユーザー追加</h3>
+
+<label>名前</label>
+
+<input
+value={newUser.name}
+onChange={(e)=>setNewUser({...newUser,name:e.target.value})}
+style={{width:"100%"}}
+/>
+
+<label>メール</label>
+
+<input
+value={newUser.email}
+onChange={(e)=>setNewUser({...newUser,email:e.target.value})}
+style={{width:"100%"}}
+/>
+
+<label>パスワード</label>
+
+<input
+type="password"
+value={newUser.password}
+onChange={(e)=>setNewUser({...newUser,password:e.target.value})}
+style={{width:"100%"}}
+/>
+
+<label>権限</label>
+
+<select
+value={newUser.role}
+onChange={(e)=>setNewUser({...newUser,role:e.target.value})}
+style={{width:"100%"}}
+>
+
+<option value="admin">admin</option>
+<option value="staff">staff</option>
+
+</select>
+
+<div style={{
+display:"flex",
+justifyContent:"space-between",
+marginTop:"20px"
+}}>
+
+<button onClick={()=>setShowAdd(false)}>
+キャンセル
+</button>
+
+<button
+onClick={addUser}
+style={{
+background:"#7b5a36",
+color:"#fff",
+padding:"6px 16px"
+}}
+>
+登録
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+)}
+
+</div>
+
+</AuthGuard>
+
+)
+
 }

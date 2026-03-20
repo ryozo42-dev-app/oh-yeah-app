@@ -1,5 +1,7 @@
 import "./globals.css"
-import { Home, Users, Beer, Utensils, Newspaper, Settings } from "lucide-react"
+import { Home, Users, Beer, Utensils, Newspaper, Image } from "lucide-react"
+import Link from "next/link"
+import UserMenu from "../components/UserMenu"
 
 export default function RootLayout({
   children,
@@ -12,47 +14,54 @@ export default function RootLayout({
 
         <div className="app">
 
+          {/* サイドバー */}
           <aside className="sidebar">
 
             <div className="logo">ADMIN</div>
 
             <nav className="menuList">
 
-              <div className="menuItem">
+              <Link href="/dashboard" className="menuItem">
                 <Home size={20}/>
                 <span>Dashboard</span>
-              </div>
+              </Link>
 
-              <div className="menuItem">
+              <Link href="/users" className="menuItem">
                 <Users size={20}/>
                 <span>Users</span>
-              </div>
+              </Link>
 
-              <div className="menuItem">
+              <Link href="/drinks" className="menuItem">
                 <Beer size={20}/>
                 <span>Drink</span>
-              </div>
+              </Link>
 
-              <div className="menuItem">
+              <Link href="/foods" className="menuItem">
                 <Utensils size={20}/>
                 <span>Food</span>
-              </div>
+              </Link>
 
-              <div className="menuItem">
+              <Link href="/news" className="menuItem">
                 <Newspaper size={20}/>
                 <span>News</span>
-              </div>
+              </Link>
 
-              <div className="menuItem">
-                <Settings size={20}/>
-                <span>Settings</span>
-              </div>
+              <Link href="/slider" className="menuItem">
+                <Image size={18}/>
+                <span>Slider</span>
+              </Link>
 
             </nav>
+
+            {/* ★ 中央マイメニュー */}
+            <div className="sidebarUserCenter">
+              <UserMenu />
+            </div>
 
           </aside>
 
 
+          {/* メイン */}
           <div className="main">
 
             <header className="header">
