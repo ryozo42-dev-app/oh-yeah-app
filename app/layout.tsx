@@ -1,7 +1,9 @@
+"use client"
+
 import "./globals.css"
 import { Home, Users, Beer, Utensils, Newspaper, Image } from "lucide-react"
 import Link from "next/link"
-import UserMenu from "../components/UserMenu"
+import AuthGuard from "@/components/AuthGuard"
 
 export default function RootLayout({
   children,
@@ -12,69 +14,67 @@ export default function RootLayout({
     <html lang="ja">
       <body>
 
-        <div className="app">
+        <AuthGuard>
 
-          {/* サイドバー */}
-          <aside className="sidebar">
+          <div className="app">
 
-            <div className="logo">ADMIN</div>
+            {/* サイドバー */}
+            <aside className="sidebar">
 
-            <nav className="menuList">
+              <div className="logo">ADMIN</div>
 
-              <Link href="/dashboard" className="menuItem">
-                <Home size={20}/>
-                <span>Dashboard</span>
-              </Link>
+              <nav className="menuList">
 
-              <Link href="/users" className="menuItem">
-                <Users size={20}/>
-                <span>Users</span>
-              </Link>
+                <Link href="/dashboard" className="menuItem">
+                  <Home size={20}/>
+                  <span>Dashboard</span>
+                </Link>
 
-              <Link href="/drinks" className="menuItem">
-                <Beer size={20}/>
-                <span>Drink</span>
-              </Link>
+                <Link href="/users" className="menuItem">
+                  <Users size={20}/>
+                  <span>Users</span>
+                </Link>
 
-              <Link href="/foods" className="menuItem">
-                <Utensils size={20}/>
-                <span>Food</span>
-              </Link>
+                <Link href="/drinks" className="menuItem">
+                  <Beer size={20}/>
+                  <span>Drink</span>
+                </Link>
 
-              <Link href="/news" className="menuItem">
-                <Newspaper size={20}/>
-                <span>News</span>
-              </Link>
+                <Link href="/foods" className="menuItem">
+                  <Utensils size={20}/>
+                  <span>Food</span>
+                </Link>
 
-              <Link href="/slider" className="menuItem">
-                <Image size={18}/>
-                <span>Slider</span>
-              </Link>
+                <Link href="/news" className="menuItem">
+                  <Newspaper size={20}/>
+                  <span>News</span>
+                </Link>
 
-            </nav>
+                <Link href="/slider" className="menuItem">
+                  <Image size={18}/>
+                  <span>Slider</span>
+                </Link>
 
-            {/* ★ 中央マイメニュー */}
-            <div className="sidebarUserCenter">
-              <UserMenu />
-            </div>
+              </nav>
 
-          </aside>
+            </aside>
 
+            {/* メイン */}
+            <div className="main">
 
-          {/* メイン */}
-          <div className="main">
+              <header className="header">
+                Oh Yeah！管理ツール
+              </header>
 
-            <header className="header">
-              Oh Yeah！管理ツール
-            </header>
+              <div className="page">
+                {children}
+              </div>
 
-            <div className="page">
-              {children}
             </div>
 
           </div>
 
-        </div>
+        </AuthGuard>
 
       </body>
     </html>
