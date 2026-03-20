@@ -1,8 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { signInWithEmailAndPassword } from "firebase/auth"
+import {
+signInWithEmailAndPassword,
+setPersistence,
+browserLocalPersistence
+} from "firebase/auth"
 import { auth } from "../../lib/firebase"
+
 
 export default function Login(){
 
@@ -13,9 +18,11 @@ const login = async () => {
 
 try{
 
+await setPersistence(auth, browserLocalPersistence)
+
 await signInWithEmailAndPassword(auth,email,password)
 
-window.location.href="/dashboard"
+location.href="/dashboard"
 
 }catch(e){
 
