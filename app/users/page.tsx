@@ -3,8 +3,9 @@
 import AuthGuard from "../../components/AuthGuard"
 import { useEffect,useState } from "react"
 import { createUserWithEmailAndPassword } from "firebase/auth"
-import { auth,db } from "../../lib/firebase"
+import { auth, db, functions } from "../../lib/firebase"
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, setDoc, updateDoc } from "firebase/firestore"
+import { httpsCallable } from "firebase/functions"
 
 
 type User={
@@ -168,11 +169,30 @@ const deleteUser = async (id: string) => {
     return
   }
 
-if(!confirm("削除しますか？")) return
+  if (!confirm("削除しますか？")) return
 
-await deleteDoc(doc(db,"users",id))
+  try {
 
-setUsers(users.filter(u=>u.id!==id))
+    // 🔥 Auth削除
+    const deleteAuth = httpsCallable(functions, "deleteUserAuth")
+    await deleteAuth({ uid: id })
+
+    // 🔥 Firestore削除
+    await deleteDoc(doc(db, "users", id))
+
+    setUsers(users.filter(u => u.id !== id))
+
+    // 🔥 ログ
+    await addDoc(collection(db, "logs"), {
+      action: "delete_user",
+      operator: auth.currentUser?.email,
+      timestamp: serverTimestamp()
+    })
+
+  } catch (e:any) {
+    console.error(e)
+    alert("削除に失敗しました")
+  }
 
 }
 

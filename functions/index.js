@@ -62,3 +62,17 @@ exports.saveDailyLogs = functions.pubsub
 
     return null
   })
+
+exports.deleteUserAuth = functions.https.onCall(async (data, context) => {
+
+  const uid = data.uid
+
+  if (!uid) {
+    throw new functions.https.HttpsError("invalid-argument", "UID required")
+  }
+
+  await admin.auth().deleteUser(uid)
+
+  return { success: true }
+
+})
