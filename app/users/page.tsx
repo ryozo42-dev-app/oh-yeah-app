@@ -4,7 +4,8 @@ import AuthGuard from "../../components/AuthGuard"
 import { useEffect,useState } from "react"
 import { createUserWithEmailAndPassword } from "firebase/auth"
 import { auth,db } from "../../lib/firebase"
-import { collection, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore"
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, setDoc, updateDoc } from "firebase/firestore"
+
 
 type User={
 id:string
@@ -28,6 +29,9 @@ role:"admin"
 const [editingUser, setEditingUser] = useState<any>(null)
 const [editName, setEditName] = useState("")
 const [showEdit, setShowEdit] = useState(false)
+const [editEmail, setEditEmail] = useState("")
+const [editRole, setEditRole] = useState("staff")
+const [myRole, setMyRole] = useState("")
 
 /* -----------------------
 load users
@@ -51,6 +55,24 @@ setUsers(list)
 load()
 
 },[])
+
+useEffect(() => {
+
+  const fetchRole = async () => {
+
+    if (!auth.currentUser) return
+
+    const snap = await getDoc(doc(db, "users", auth.currentUser.uid))
+
+    if (snap.exists()) {
+      setMyRole(snap.data().role)
+    }
+
+  }
+
+  fetchRole()
+
+}, [])
 
 
 // -----------------------
@@ -102,19 +124,34 @@ alert(e.message)
 const openEdit = (user:any) => {
   setEditingUser(user)
   setEditName(user.name)
+  setEditEmail(user.email)
+  setEditRole(user.role || "staff")
   setShowEdit(true)
 }
 
 const saveEdit = async () => {
+
+  if (myRole !== "admin") {
+    alert("権限がありません")
+    return
+  }
 
   if (!editingUser) return
 
   await updateDoc(
     doc(db, "users", editingUser.id),
     {
-      name: editName
+      name: editName,
+      role: editRole
+      // emailは更新しない
     }
   )
+
+  await addDoc(collection(db, "logs"), {
+    action: "edit_user",
+    operator: auth.currentUser?.email,
+    timestamp: serverTimestamp()
+  })
 
   setShowEdit(false)
 }
@@ -124,7 +161,12 @@ const saveEdit = async () => {
 // delete user
 // -----------------------
 
-const deleteUser = async(id:string)=>{
+const deleteUser = async (id: string) => {
+
+  if (myRole !== "admin") {
+    alert("権限がありません")
+    return
+  }
 
 if(!confirm("削除しますか？")) return
 
@@ -189,13 +231,17 @@ marginTop:"30px"
 
 <td style={{border:"1px solid #ddd",padding:"8px"}}>
 
+{myRole === "admin" && (
 <button onClick={()=>openEdit(u)} style={{marginRight:"6px"}}>
 編集
 </button>
+)}
 
-<button onClick={()=>deleteUser(u.id)}>
-削除
-</button>
+{myRole === "admin" && (
+  <button onClick={() => deleteUser(u.id)}>
+    削除
+  </button>
+)}
 
 </td>
 
@@ -337,11 +383,37 @@ padding:"6px 16px"
 
       <h3>ユーザー編集</h3>
 
-      <input
+<input
         value={editName}
         onChange={(e)=>setEditName(e.target.value)}
-        style={{ width:"100%", marginBottom:10 }}
-      />
+  placeholder="名前"
+  style={{ width:"100%", marginBottom:8 }}
+/>
+
+<input
+  value={editEmail}
+  disabled
+  style={{
+    width:"100%",
+    marginBottom:8,
+    background:"#eee",
+    color:"#666",
+    cursor:"not-allowed"
+  }}
+/>
+
+<p style={{ fontSize: "12px", color: "#999" }}>
+  ※メール変更は再登録してください
+</p>
+
+<select
+  value={editRole}
+  onChange={(e)=>setEditRole(e.target.value)}
+  style={{ width:"100%", marginBottom:10 }}
+>
+  <option value="admin">管理者</option>
+  <option value="staff">スタッフ</option>
+</select>
 
       <button onClick={saveEdit}>
         保存
