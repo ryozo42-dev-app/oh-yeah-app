@@ -4,14 +4,7 @@ import AuthGuard from "../../components/AuthGuard"
 import { useEffect,useState } from "react"
 import { createUserWithEmailAndPassword } from "firebase/auth"
 import { auth,db } from "../../lib/firebase"
-
-import {
-collection,
-getDocs,
-doc,
-setDoc,
-deleteDoc
-} from "firebase/firestore"
+import { collection, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore"
 
 type User={
 id:string
@@ -31,6 +24,10 @@ email:"",
 password:"",
 role:"admin"
 })
+
+const [editingUser, setEditingUser] = useState<any>(null)
+const [editName, setEditName] = useState("")
+const [showEdit, setShowEdit] = useState(false)
 
 /* -----------------------
 load users
@@ -102,6 +99,26 @@ alert(e.message)
 
 }
 
+const openEdit = (user:any) => {
+  setEditingUser(user)
+  setEditName(user.name)
+  setShowEdit(true)
+}
+
+const saveEdit = async () => {
+
+  if (!editingUser) return
+
+  await updateDoc(
+    doc(db, "users", editingUser.id),
+    {
+      name: editName
+    }
+  )
+
+  setShowEdit(false)
+}
+
 
 // -----------------------
 // delete user
@@ -171,6 +188,10 @@ marginTop:"30px"
 </td>
 
 <td style={{border:"1px solid #ddd",padding:"8px"}}>
+
+<button onClick={()=>openEdit(u)} style={{marginRight:"6px"}}>
+編集
+</button>
 
 <button onClick={()=>deleteUser(u.id)}>
 削除
@@ -293,6 +314,45 @@ padding:"6px 16px"
 
 </div>
 
+)}
+
+{showEdit && (
+  <div style={{
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    background: "rgba(0,0,0,0.4)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center"
+  }}>
+    <div style={{
+      background: "#fff",
+      padding: 20,
+      borderRadius: 10,
+      width: 300
+    }}>
+
+      <h3>ユーザー編集</h3>
+
+      <input
+        value={editName}
+        onChange={(e)=>setEditName(e.target.value)}
+        style={{ width:"100%", marginBottom:10 }}
+      />
+
+      <button onClick={saveEdit}>
+        保存
+      </button>
+
+      <button onClick={()=>setShowEdit(false)}>
+        キャンセル
+      </button>
+
+    </div>
+  </div>
 )}
 
 </div>
