@@ -76,3 +76,30 @@ exports.deleteUserAuth = functions.https.onCall(async (data, context) => {
   return { success: true }
 
 })
+
+exports.createUserAuth = functions.https.onCall(async (data, context) => {
+
+  const { email, password, name, role } = data
+
+  if (!email || !password) {
+    throw new functions.https.HttpsError("invalid-argument", "必要なデータ不足")
+  }
+
+  // 🔥 Auth作成
+  const userRecord = await admin.auth().createUser({
+    email,
+    password
+  })
+
+  const uid = userRecord.uid
+
+  // 🔥 Firestore作成
+  await admin.firestore().collection("users").doc(uid).set({
+    name,
+    email,
+    role,
+    createdAt: admin.firestore.FieldValue.serverTimestamp()
+  })
+
+  return { success: true }
+})
