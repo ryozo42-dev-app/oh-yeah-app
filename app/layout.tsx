@@ -1,9 +1,8 @@
-"use client"
-
 import "./globals.css"
 import { Home, Users, Beer, Utensils, Newspaper, Image } from "lucide-react"
 import Link from "next/link"
 import AuthGuard from "@/components/AuthGuard"
+import UserMenu from "@/components/UserMenu"
 
 export default function RootLayout({
   children,
@@ -13,14 +12,11 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body>
-
         <AuthGuard>
 
           <div className="app">
 
-            {/* サイドバー */}
             <aside className="sidebar">
-
               <div className="logo">ADMIN</div>
 
               <nav className="menuList">
@@ -55,13 +51,15 @@ export default function RootLayout({
                   <span>Slider</span>
                 </Link>
 
-              </nav>
+                {/* 👇 これ */}
+                <div className="userMenuArea">
+                  <UserMenu />
+                </div>
 
+              </nav>
             </aside>
 
-            {/* メイン */}
             <div className="main">
-
               <header className="header">
                 Oh Yeah！管理ツール
               </header>
@@ -69,13 +67,11 @@ export default function RootLayout({
               <div className="page">
                 {children}
               </div>
-
             </div>
 
           </div>
 
         </AuthGuard>
-
       </body>
     </html>
   )
