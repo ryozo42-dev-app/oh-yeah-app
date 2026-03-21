@@ -2,10 +2,10 @@
 
 import AuthGuard from "../../components/AuthGuard"
 import { useEffect,useState } from "react"
-import { createUserWithEmailAndPassword } from "firebase/auth"
-import { auth, db, functions } from "../../lib/firebase"
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, setDoc, updateDoc } from "firebase/firestore"
+import { auth, db, functions, secondaryAuth } from "../../lib/firebase"
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, updateDoc, setDoc } from "firebase/firestore"
 import { httpsCallable } from "firebase/functions"
+import { createUserWithEmailAndPassword } from "firebase/auth"
 
 
 type User={
@@ -75,50 +75,56 @@ useEffect(() => {
 
 }, [])
 
+const closeAddModal = () => {
+  setShowAdd(false)
+  setNewUser({
+    name: "",
+    email: "",
+    password: "",
+    role: "admin"
+  })
+}
+
 
 // -----------------------
 // add user
 // -----------------------
 
-const addUser = async()=>{
+const addUser = async () => {
 
-try{
+  try {
 
-const cred = await createUserWithEmailAndPassword(
-auth,
-newUser.email,
-newUser.password
-)
+    const createUser = httpsCallable(functions, "createUserAuth")
 
-const uid = cred.user.uid
+    await createUser({
+      email: newUser.email,
+      password: newUser.password,
+      name: newUser.name,
+      role: newUser.role
+    })
 
-await setDoc(doc(db,"users",uid),{
+    // 再取得
+    const snap = await getDocs(collection(db, "users"))
+    const list = snap.docs.map(d => ({
+      id: d.id,
+      ...d.data()
+    })) as User[]
 
-name:newUser.name,
-email:newUser.email,
-role:newUser.role,
-createdAt:new Date()
+    setUsers(list)
 
-})
+    setShowAdd(false)
 
-setUsers([
-...users,
-{
-id:uid,
-name:newUser.name,
-email:newUser.email,
-role:newUser.role
-}
-])
+    setNewUser({
+      name: "",
+      email: "",
+      password: "",
+      role: "admin"
+    })
 
-setShowAdd(false)
-
-}catch(e:any){
-
-console.error(e)
-alert(e.message)
-
-}
+  } catch (e:any) {
+    console.error(e)
+    alert(e.message)
+  }
 
 }
 
@@ -304,16 +310,22 @@ background:"rgba(0,0,0,0.4)",
 display:"flex",
 alignItems:"center",
 justifyContent:"center"
-}}>
+}}
+onClick={closeAddModal}
+>
 
 <div style={{
 background:"#fff",
 padding:"25px",
 borderRadius:"8px",
 width:"400px"
-}}>
+}}
+onClick={(e)=>e.stopPropagation()}
+>
 
 <h3>ユーザー追加</h3>
+
+<form autoComplete="off">
 
 <label>名前</label>
 
@@ -329,6 +341,7 @@ style={{width:"100%"}}
 value={newUser.email}
 onChange={(e)=>setNewUser({...newUser,email:e.target.value})}
 style={{width:"100%"}}
+autoComplete="off"
 />
 
 <label>パスワード</label>
@@ -338,6 +351,7 @@ type="password"
 value={newUser.password}
 onChange={(e)=>setNewUser({...newUser,password:e.target.value})}
 style={{width:"100%"}}
+autoComplete="off"
 />
 
 <label>権限</label>
@@ -353,13 +367,15 @@ style={{width:"100%"}}
 
 </select>
 
+</form>
+
 <div style={{
 display:"flex",
 justifyContent:"space-between",
 marginTop:"20px"
 }}>
 
-<button onClick={()=>setShowAdd(false)}>
+<button onClick={closeAddModal}>
 キャンセル
 </button>
 
