@@ -188,7 +188,6 @@ return(
 <div style={{padding:"40px"}}>
 
 <h1 style={{textAlign:"center"}}>Users管理</h1>
-<h1>🔥 ここはpage.tsx🔥</h1>
 
 <table
 style={{
