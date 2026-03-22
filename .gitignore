@@ -1,3 +1,16 @@
-node_modules
-.next
-.env
+# Flutter
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+*.iml
+
+# logs
+*.log

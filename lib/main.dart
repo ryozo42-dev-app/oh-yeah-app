@@ -1,32 +1,30 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:carousel_slider/carousel_slider.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:intl/intl.dart';
 import 'firebase_options.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
+
+// バックグラウンドでメッセージを処理するためのトップレベル関数
+@pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
   print("🔔 Background message: ${message.messageId}");
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  FirebaseMessaging.onBackgroundMessage(
-    _firebaseMessagingBackgroundHandler,
-  );
-
-  runApp(const MyApp());
+  runApp(MyApp());
 }
-
-/* ===========================
-   MAIN
-=========================== */
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -35,11 +33,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFFF5F5DC),
-        primaryColor: const Color(0xFF3E2723),
+      home: MainNavigationScreen(
+        onMenuTap: () {},
+        onMapTap: () {},
       ),
-      home: const MainNavigationScreen(),
     );
   }
 }
@@ -49,7 +46,15 @@ class MyApp extends StatelessWidget {
 =========================== */
 
 class MainNavigationScreen extends StatefulWidget {
-  const MainNavigationScreen({super.key});
+
+  final VoidCallback? onMenuTap;
+  final VoidCallback? onMapTap;
+
+  const MainNavigationScreen({
+    super.key,
+    this.onMenuTap,
+    this.onMapTap,
+  });
 
   @override
   State<MainNavigationScreen> createState() =>
@@ -166,9 +171,14 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    setupPush();
+  }
+
+  void setupPush() {
     requestPermission();
     getToken();
     FirebaseMessaging.instance.subscribeToTopic("news");
+    FirebaseMessaging.instance.subscribeToTopic("all");
   }
 
   void requestPermission() async {
@@ -276,12 +286,14 @@ class _HomePageState extends State<HomePage> {
                                   .circular(
                                       20),
                           child:
-                              Image.network(
-                            imageUrl,
-                            fit: BoxFit
-                                .cover,
-                            width: double
-                                .infinity,
+                              CachedNetworkImage(
+                            imageUrl: imageUrl,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            placeholder: (context, url) => Container(
+                              color: Colors.black12,
+                            ),
+                            errorWidget: (context, url, error) => const Icon(Icons.error),
                           ),
                         );
                       }).toList(),
@@ -308,9 +320,9 @@ class _HomePageState extends State<HomePage> {
                                   shape:
                                       BoxShape
                                           .circle,
-                                  color: _current == e.key
-                                      ? Colors.brown.withOpacity(0.9)
-                                      : Colors.brown.withOpacity(0.4),
+                                  color: Colors.brown.withValues(
+                                    alpha: _current == e.key ? 0.9 : 0.4,
+                                  ),
                                 ),
                               ))
                           .toList(),
@@ -412,6 +424,7 @@ class MenuPage extends StatefulWidget {
 
 class _MenuPageState extends State<MenuPage> {
   String selectedCategory = "ALL";
+  String selectedFoodCategory = "ALL";
   List<String> drinkCategories = ["ALL"];
 
   @override
@@ -505,28 +518,30 @@ class _MenuPageState extends State<MenuPage> {
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: DropdownButton<String>(
-            value: selectedCategory,
-            isExpanded: true,
-            alignment: Alignment.center,
-            items: drinkCategories.map((cat) {
-              return DropdownMenuItem(
-                value: cat,
-                child: Center(
-                  child: Text(
-                    cat,
-                    textAlign: TextAlign.center,
+        Center(
+          child: SizedBox(
+            width: 200,
+            child: DropdownButton<String>(
+              value: selectedCategory,
+              isExpanded: true,
+              alignment: Alignment.center,
+              items: drinkCategories.map((cat) {
+                return DropdownMenuItem(
+                  value: cat,
+                  child: Center(
+                    child: Text(
+                      cat,
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                ),
-              );
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                selectedCategory = value!;
-              });
-            },
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedCategory = value!;
+                });
+              },
+            ),
           ),
         ),
         Expanded(
@@ -565,7 +580,7 @@ class _MenuPageState extends State<MenuPage> {
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
+                          color: Colors.black.withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 3),
                         )
@@ -624,11 +639,10 @@ class _MenuPageState extends State<MenuPage> {
   Widget buildFoodMenu() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
-          .collection('menu_items')
-          .where('isActive', isEqualTo: true)
-          .where('category', isEqualTo: 'food')
-          .orderBy('order')
-          .snapshots(),
+    .collection('menu_foods')
+    .where('isActive', isEqualTo: true)
+    .orderBy('order', descending: false)
+    .snapshots(),
       builder: (context, snapshot) {
 
         if (snapshot.hasError) {
@@ -640,102 +654,286 @@ class _MenuPageState extends State<MenuPage> {
         }
 
         final docs = snapshot.data!.docs;
+        final filteredDocs = selectedFoodCategory == "ALL"
+            ? docs
+            : docs.where((d) => d['foodCategory'] == selectedFoodCategory).toList();
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: docs.length,
-          itemBuilder: (context, index) {
+        if (docs.isEmpty) {
+          return const Center(child: Text("Foodメニューがありません"));
+        }
 
-            final data = docs[index].data() as Map<String, dynamic>;
+        final categories = docs
+            .map((doc) => (doc.data() as Map<String, dynamic>)['foodCategory']?.toString() ?? "")
+            .where((c) => c.isNotEmpty)
+            .toSet()
+            .toList();
+        categories.sort();
 
-            return Container(
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  )
-                ],
+        return Column(
+          children: [
+            Center(
+              child: SizedBox(
+                width: 200,
+                child: DropdownButton<String>(
+                  isExpanded: true,
+                  value: categories.contains(selectedFoodCategory) ? selectedFoodCategory : "ALL",
+                  items: ["ALL", ...categories].map((c) {
+                    return DropdownMenuItem(
+                      value: c,
+                      child: Center(
+                        child: Text(c),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedFoodCategory = value!;
+                    });
+                  },
+                ),
               ),
+            ),
+            Expanded(
+              child: ListView(
+                children: filteredDocs.map((doc) => FoodCard(doc)).toList(),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class FoodDetailPage extends StatelessWidget {
+
+  final Map<String,dynamic> data;
+
+  const FoodDetailPage({
+    super.key,
+    required this.data,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: const Color(0xFF3E2723),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          "FOOD",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ),
+
+      backgroundColor: const Color(0xFFF5EFE6),
+
+      body: SingleChildScrollView(
+
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+
+            /// 料理写真
+            CachedNetworkImage(
+              imageUrl: data['imageUrl'],
+              width: double.infinity,
+              height: 260,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Container(
+                color: Colors.black12,
+              ),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.all(20),
+
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  /// 画像
-                  if (data['imageUrl'] != null && data['imageUrl'] != "")
-                    ClipRRect(
-                      borderRadius: BorderRadius.zero,
-                      child: Image.network(
-                        data['imageUrl'],
-                        width: double.infinity,
-                        height: 180,
-                        fit: BoxFit.cover,
-                      ),
+                  /// 日本語
+                  Text(
+                    data['name'] ?? "",
+                    style: const TextStyle(
+                      fontSize:26,
+                      fontWeight: FontWeight.bold,
                     ),
+                  ),
 
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                  const SizedBox(height:6),
 
-                        /// 日本語 + 価格
-                        Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              data['name'] ?? "",
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              "¥${data['price']}",
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
+                  /// 英語（日本語と同じサイズ）
+                  Text(
+                    data['name_en'] ?? "",
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
 
-                        const SizedBox(height: 6),
+                  const SizedBox(height:18),
 
-                        /// 英語
-                        Text(
-                          data['name_en'] ?? "",
-                          style: const TextStyle(
-                            fontSize: 18,
-                            color: Colors.black87,
-                          ),
-                        ),
+                  /// 説明（濃く見やすく）
+                  Text(
+                    data['description'] ?? "",
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                      height: 1.5,
+                    ),
+                  ),
 
-                        const SizedBox(height: 10),
+                  const SizedBox(height:26),
 
-                        /// 説明
-                        Text(
-                          data['description'] ?? "",
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.black54,
-                            height: 1.4,
-                          ),
-                        ),
-                      ],
+                  /// 価格（大きく）
+                  Text(
+                    "¥${data['price']}",
+                    style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF3E2723),
+                    ),
+                  ),
+
+                ],
+              ),
+            ),
+
+          ],
+        ),
+
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: const Color(0xFF3E2723),
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.grey,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: "HOME",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.restaurant_menu),
+            label: "MENU",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.newspaper),
+            label: "NEWS",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.camera_alt_outlined),
+            label: "Instagram",
+          ),
+        ],
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pop(context);
+          }
+        },
+      ),
+    );
+  }
+}
+
+class FoodCard extends StatelessWidget {
+  final QueryDocumentSnapshot doc;
+
+  const FoodCard(this.doc, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final data = doc.data() as Map<String, dynamic>;
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FoodDetailPage(data: data),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            )
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: CachedNetworkImage(
+                imageUrl: data['imageUrl'],
+                width: 70,
+                height: 70,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  color: Colors.black12,
+                ),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// 日本語名
+                  Text(
+                    data['name'],
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  /// 英語名（濃くする）
+                  Text(
+                    data['name_en'],
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  /// 価格
+                  Text(
+                    "¥${data['price']}",
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                   ),
                 ],
               ),
-            );
-          },
-        );
-      },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -836,10 +1034,14 @@ class NewsPage extends StatelessWidget {
                           borderRadius: const BorderRadius.vertical(
                             top: Radius.circular(16),
                           ),
-                          child: Image.network(
-                            imageUrl,
+                          child: CachedNetworkImage(
+                            imageUrl: imageUrl,
                             width: double.infinity,
                             fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              color: Colors.black12,
+                            ),
+                            errorWidget: (context, url, error) => const Icon(Icons.error),
                           ),
                         ),
 
@@ -924,10 +1126,14 @@ class NewsDetailPage extends StatelessWidget {
             if (imageUrl != null && imageUrl!.isNotEmpty)
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.network(
-                  imageUrl!,
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl!,
                   width: double.infinity,
                   fit: BoxFit.fitWidth,
+                  placeholder: (context, url) => Container(
+                    color: Colors.black12,
+                  ),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
                 ),
               ),
             Padding(
