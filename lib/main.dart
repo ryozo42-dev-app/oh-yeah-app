@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'splash_screen.dart';
 
 
 // バックグラウンドでメッセージを処理するためのトップレベル関数
@@ -33,10 +34,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MainNavigationScreen(
-        onMenuTap: () {},
-        onMapTap: () {},
-      ),
+      home: const SplashScreen(),
+      routes: {
+        '/home': (context) => MainNavigationScreen(
+              onMenuTap: () {},
+              onMapTap: () {},
+            ),
+      },
     );
   }
 }

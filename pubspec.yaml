@@ -47,3 +47,8 @@ flutter:
 
   assets:
     - assets/images/
+
+  fonts:
+    - family: Impact
+      fonts:
+        - asset: assets/fonts/Impact.ttf
