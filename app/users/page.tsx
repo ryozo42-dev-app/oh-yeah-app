@@ -27,11 +27,8 @@ password:"",
 role:"admin"
 })
 
-const [editingUser, setEditingUser] = useState<any>(null)
-const [editName, setEditName] = useState("")
+const [editUser, setEditUser] = useState<any>(null)
 const [showEdit, setShowEdit] = useState(false)
-const [editEmail, setEditEmail] = useState("")
-const [editRole, setEditRole] = useState("staff")
 const [myRole, setMyRole] = useState("")
 
 /* -----------------------
@@ -129,38 +126,39 @@ const addUser = async () => {
 }
 
 const openEdit = (user:any) => {
-  setEditingUser(user)
-  setEditName(user.name)
-  setEditEmail(user.email)
-  setEditRole(user.role || "staff")
+  setEditUser({...user})
   setShowEdit(true)
 }
 
-const saveEdit = async () => {
+const saveUser = async () => {
 
-  if (myRole !== "admin") {
-    alert("権限がありません")
+  if (!editUser?.id) {
+    alert("IDがありません")
     return
   }
 
-  if (!editingUser) return
+  try {
 
-  await updateDoc(
-    doc(db, "users", editingUser.id),
-    {
-      name: editName,
-      role: editRole
-      // emailは更新しない
-    }
-  )
+    await updateDoc(doc(db, "users", editUser.id), {
+      name: editUser.name || "",
+      email: editUser.email || "",
+      role: editUser.role || "user"
+    })
 
-  await addDoc(collection(db, "logs"), {
-    action: "edit_user",
-    operator: auth.currentUser?.email,
-    timestamp: serverTimestamp()
-  })
+    alert("保存完了")
 
-  setShowEdit(false)
+    setUsers(
+      users.map(u =>
+        u.id === editUser.id ? editUser : u
+      )
+    )
+
+    setShowEdit(false)
+
+  } catch (e) {
+    console.error(e)
+    alert("保存失敗")
+  }
 }
 
 
@@ -420,21 +418,18 @@ padding:"6px 16px"
       <h3>ユーザー編集</h3>
 
 <input
-        value={editName}
-        onChange={(e)=>setEditName(e.target.value)}
+        value={editUser.name}
+        onChange={(e)=>setEditUser({...editUser, name: e.target.value})}
   placeholder="名前"
   style={{ width:"100%", marginBottom:8 }}
 />
 
 <input
-  value={editEmail}
-  disabled
+  value={editUser.email}
+  onChange={(e)=>setEditUser({...editUser, email: e.target.value})}
   style={{
     width:"100%",
-    marginBottom:8,
-    background:"#eee",
-    color:"#666",
-    cursor:"not-allowed"
+    marginBottom:8
   }}
 />
 
@@ -443,15 +438,15 @@ padding:"6px 16px"
 </p>
 
 <select
-  value={editRole}
-  onChange={(e)=>setEditRole(e.target.value)}
+  value={editUser.role}
+  onChange={(e)=>setEditUser({...editUser, role: e.target.value})}
   style={{ width:"100%", marginBottom:10 }}
 >
   <option value="admin">管理者</option>
   <option value="staff">スタッフ</option>
 </select>
 
-      <button onClick={saveEdit}>
+      <button onClick={saveUser}>
         保存
       </button>
 
