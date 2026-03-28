@@ -36,6 +36,8 @@ try{
 
 const snap = await getDocs(collection(db,"slider_images"))
 
+console.log("slider docs:",snap.docs.length)
+
 const list = snap.docs.map(d=>({
 id:d.id,
 imageUrl:d.data().imageUrl || ""
@@ -59,7 +61,7 @@ const file = e.target.files?.[0]
 if(!file) return
 
 if(!file.type.includes("jpeg") && !file.type.includes("jpg")){
-alert("JPG / JPEGのみアップロード可能です")
+alert("JPGのみ")
 return
 }
 
@@ -96,7 +98,7 @@ s.id===currentSlide.id
 setShowModal(false)
 
 }catch(e){
-console.log("upload error",e)
+console.log(e)
 alert("アップロード失敗")
 }
 
@@ -109,6 +111,10 @@ return(
 <div style={{padding:"30px"}}>
 
 <h1 style={{textAlign:"center"}}>Slider管理</h1>
+
+{slides.length===0 && (
+<p style={{textAlign:"center"}}>データなし</p>
+)}
 
 <div
 style={{
@@ -127,31 +133,16 @@ marginTop:"30px"
 
 <div key={s.id} style={{textAlign:"center"}}>
 
-{s.imageUrl ? (
-
 <img
-src={s.imageUrl}
+src={s.imageUrl || "/noimage.png"}
 style={{
 width:"260px",
 aspectRatio:"16 / 9",
 objectFit:"cover",
 borderRadius:"8px",
-boxShadow:"0 6px 16px rgba(0,0,0,0.15)"
+background:"#eee"
 }}
 />
-
-):(
-
-<div
-style={{
-width:"260px",
-aspectRatio:"16 / 9",
-background:"#eee",
-borderRadius:"8px"
-}}
-/>
-
-)}
 
 <button
 onClick={()=>{
@@ -165,8 +156,7 @@ marginTop:"12px",
 background:"#7b5a36",
 color:"#fff",
 padding:"8px 16px",
-borderRadius:"6px",
-cursor:"pointer"
+borderRadius:"6px"
 }}
 >
 画像変更
@@ -180,8 +170,7 @@ cursor:"pointer"
 
 {showModal && currentSlide && (
 
-<div
-style={{
+<div style={{
 position:"fixed",
 top:0,
 left:0,
@@ -191,81 +180,50 @@ background:"rgba(0,0,0,0.4)",
 display:"flex",
 alignItems:"center",
 justifyContent:"center"
-}}
->
+}}>
 
-<div
-style={{
+<div style={{
 background:"#fff",
 padding:"25px",
 borderRadius:"8px",
 width:"420px",
 textAlign:"center"
-}}
->
+}}>
 
 <h3>画像変更</h3>
 
-<p>現在の画像</p>
-
-{currentSlide.imageUrl && (
 <img
 src={currentSlide.imageUrl}
 style={{
 width:"100%",
 aspectRatio:"16 / 9",
-objectFit:"cover",
-borderRadius:"6px"
+objectFit:"cover"
 }}
 />
-)}
 
 {preview && (
-
-<>
-<p style={{marginTop:"15px"}}>新しい画像</p>
-
 <img
 src={preview}
 style={{
 width:"100%",
 aspectRatio:"16 / 9",
 objectFit:"cover",
-borderRadius:"6px"
+marginTop:"10px"
 }}
 />
-</>
-
 )}
 
-<input
-type="file"
-onChange={handleFile}
-style={{marginTop:"15px"}}
-/>
+<input type="file" onChange={handleFile}/>
 
-<div
-style={{
+<div style={{
 marginTop:"20px",
 display:"flex",
 justifyContent:"space-between"
-}}
->
+}}>
 
-<button onClick={()=>setShowModal(false)}>
-キャンセル
-</button>
+<button onClick={()=>setShowModal(false)}>キャンセル</button>
 
-<button
-onClick={saveImage}
-style={{
-background:"#7b5a36",
-color:"#fff",
-padding:"6px 16px"
-}}
->
-変更
-</button>
+<button onClick={saveImage}>保存</button>
 
 </div>
 
