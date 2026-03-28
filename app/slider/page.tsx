@@ -32,25 +32,13 @@ useEffect(()=>{
 
 const load = async()=>{
 
-const snap = await getDocs(collection(db,"slider_images"))
-
-const list = snap.docs.map(d=>{
-
-let url = d.data().imageUrl || ""
-
-// 🔥 トークン削除（これが原因）
-if(url.includes("&token=")){
-url = url.split("&token=")[0]
+// 🔥 完全固定URLで検証（これで出なければStorage確定）
+setSlides([
+{
+id:"test",
+imageUrl:"https://firebasestorage.googleapis.com/v0/b/oh-yeah-9fdc6.appspot.com/o/slider%2FKWaNZfm4ZsJbWHqAICIs.jpg?alt=media"
 }
-
-return{
-id:d.id,
-imageUrl:url
-}
-
-})
-
-setSlides(list)
+])
 
 }
 
@@ -175,4 +163,60 @@ justifyContent:"center"
 }}>
 
 <div style={{
-background:"#
+background:"#fff",
+padding:"25px",
+borderRadius:"8px",
+width:"420px",
+textAlign:"center"
+}}>
+
+<h3>画像変更</h3>
+
+<img
+src={currentSlide.imageUrl}
+style={{
+width:"100%",
+aspectRatio:"16 / 9",
+objectFit:"cover"
+}}
+/>
+
+{preview && (
+<img
+src={preview}
+style={{
+width:"100%",
+aspectRatio:"16 / 9",
+objectFit:"cover",
+marginTop:"10px"
+}}
+/>
+)}
+
+<input type="file" onChange={handleFile}/>
+
+<div style={{
+marginTop:"20px",
+display:"flex",
+justifyContent:"space-between"
+}}>
+
+<button onClick={()=>setShowModal(false)}>キャンセル</button>
+
+<button onClick={saveImage}>保存</button>
+
+</div>
+
+</div>
+
+</div>
+
+)}
+
+</div>
+
+</AuthGuard>
+
+)
+
+}
