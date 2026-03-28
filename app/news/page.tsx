@@ -68,37 +68,51 @@ const perPage=6
 ------------------------- */
 const processImage = async (file: File) => {
 
-  const img = new Image()
-  img.src = URL.createObjectURL(file)
+  return new Promise<string>((resolve, reject) => {
 
-  await new Promise((resolve) => {
-    img.onload = resolve
+    const img = new Image()
+
+    img.onload = async () => {
+
+      try{
+
+        const canvas = document.createElement("canvas")
+        const ctx = canvas.getContext("2d")
+
+        const maxWidth = 800
+        const scale = maxWidth / img.width
+
+        canvas.width = maxWidth
+        canvas.height = img.height * scale
+
+        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height)
+
+        canvas.toBlob(async (blob) => {
+
+          if(!blob) return reject("blob失敗")
+
+          const fileName = `news_${Date.now()}.jpg`
+          const storageRef = ref(storage, `news/${fileName}`)
+
+          await uploadBytes(storageRef, blob)
+          const url = await getDownloadURL(storageRef)
+
+          resolve(url)
+
+        }, "image/jpeg", 0.7)
+
+      }catch(e){
+        reject(e)
+      }
+
+    }
+
+    img.onerror = reject
+
+    img.src = URL.createObjectURL(file)
+
   })
 
-  const canvas = document.createElement("canvas")
-  const ctx = canvas.getContext("2d")
-
-  const maxWidth = 800
-  const scale = maxWidth / img.width
-
-  canvas.width = maxWidth
-  canvas.height = img.height * scale
-
-  ctx?.drawImage(img, 0, 0, canvas.width, canvas.height)
-
-  const blob: Blob = await new Promise((resolve) => {
-    canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.7)
-  })
-
-  const fileName = `news_${Date.now()}.jpg`
-
-  const storageRef = ref(storage, `news/${fileName}`)
-
-  await uploadBytes(storageRef, blob)
-
-  const url = await getDownloadURL(storageRef)
-
-  return url
 }
 
 const deleteOldImage = async (url: string) => {
