@@ -29,6 +29,7 @@ id?:string
 title:string
 body:string
 imageUrl?:string
+createdAt?:any
 date:any
 isPublished:boolean
 }
@@ -126,30 +127,34 @@ load
 useEffect(()=>{
 
 const load = async () => {
+  try {
+    const q = query(
+      collection(db,"news"),
+      orderBy("createdAt","desc") // ★新しい順
+    )
 
-  const q = query(
-    collection(db,"news"),
-    orderBy("date","desc") // ★新しい順
-  )
+    const snap = await getDocs(q)
 
-  const snap = await getDocs(q)
+    const list = snap.docs.map(d=>{
 
-  const list = snap.docs.map(d=>{
+      const data = d.data()
 
-    const data = d.data()
+      return{
+        id:d.id,
+        title:data.title||"",
+        body:data.body||"",
+        imageUrl:data.imageUrl||"",
+        createdAt:data.createdAt?.toDate?.() || null,
+        date:data.date?.toDate?.() || null,
+        isPublished:data.isPublished ?? true
+      }
 
-    return{
-      id:d.id,
-      title:data.title||"",
-      body:data.body||"",
-      imageUrl:data.imageUrl||"",
-      date:data.date?.toDate?.() || null,
-      isPublished:data.isPublished ?? true
-    }
+    })
 
-  })
-
-  setNews(list)
+    setNews(list)
+  } catch (e) {
+    console.log(e)
+  }
 }
 
 load()
