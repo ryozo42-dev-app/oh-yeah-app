@@ -1,22 +1,18 @@
 "use client"
 
 import AuthGuard from "../../components/AuthGuard"
-
 import { useEffect,useState } from "react"
-
 import {
 collection,
 getDocs,
 doc,
 setDoc
 } from "firebase/firestore"
-
 import {
 ref,
 uploadBytes,
 getDownloadURL
 } from "firebase/storage"
-
 import { db,storage } from "../../lib/firebase"
 
 type Slide={
@@ -27,31 +23,29 @@ imageUrl:string
 export default function Slider(){
 
 const [slides,setSlides] = useState<Slide[]>([])
-
 const [showModal,setShowModal] = useState(false)
 const [currentSlide,setCurrentSlide] = useState<Slide|null>(null)
-
 const [newImage,setNewImage] = useState<File | null>(null)
 const [preview,setPreview] = useState("")
-
-/* -------------------------
-load
-------------------------- */
 
 useEffect(()=>{
 
 const load = async()=>{
 
+try{
+
 const snap = await getDocs(collection(db,"slider_images"))
 
 const list = snap.docs.map(d=>({
-
 id:d.id,
-imageUrl:d.data().imageUrl
-
+imageUrl:d.data().imageUrl || ""
 }))
 
 setSlides(list)
+
+}catch(e){
+console.log("slider load error",e)
+}
 
 }
 
@@ -59,14 +53,9 @@ load()
 
 },[])
 
-/* -------------------------
-file select
-------------------------- */
-
 const handleFile = (e:any)=>{
 
-const file = e.target.files[0]
-
+const file = e.target.files?.[0]
 if(!file) return
 
 if(!file.type.includes("jpeg") && !file.type.includes("jpg")){
@@ -75,18 +64,15 @@ return
 }
 
 setNewImage(file)
-
 setPreview(URL.createObjectURL(file))
 
 }
 
-/* -------------------------
-save image
-------------------------- */
-
 const saveImage = async()=>{
 
 if(!newImage || !currentSlide) return
+
+try{
 
 const storageRef = ref(storage,`slider/${currentSlide.id}.jpg`)
 
@@ -95,10 +81,8 @@ await uploadBytes(storageRef,newImage)
 const url = await getDownloadURL(storageRef)
 
 await setDoc(doc(db,"slider_images",currentSlide.id),{
-
 imageUrl:url,
 isActive:true
-
 })
 
 setSlides(
@@ -111,11 +95,12 @@ s.id===currentSlide.id
 
 setShowModal(false)
 
+}catch(e){
+console.log("upload error",e)
+alert("アップロード失敗")
 }
 
-/* =========================
-UI
-========================= */
+}
 
 return(
 
@@ -138,9 +123,11 @@ marginTop:"30px"
 }}
 >
 
-{slides.map((s,i)=>(
+{slides.map((s)=>(
 
 <div key={s.id} style={{textAlign:"center"}}>
+
+{s.imageUrl ? (
 
 <img
 src={s.imageUrl}
@@ -152,6 +139,19 @@ borderRadius:"8px",
 boxShadow:"0 6px 16px rgba(0,0,0,0.15)"
 }}
 />
+
+):(
+
+<div
+style={{
+width:"260px",
+aspectRatio:"16 / 9",
+background:"#eee",
+borderRadius:"8px"
+}}
+/>
+
+)}
 
 <button
 onClick={()=>{
@@ -177,11 +177,6 @@ cursor:"pointer"
 ))}
 
 </div>
-
-
-{/* -------------------------
-image modal
-------------------------- */}
 
 {showModal && currentSlide && (
 
@@ -213,6 +208,7 @@ textAlign:"center"
 
 <p>現在の画像</p>
 
+{currentSlide.imageUrl && (
 <img
 src={currentSlide.imageUrl}
 style={{
@@ -222,6 +218,7 @@ objectFit:"cover",
 borderRadius:"6px"
 }}
 />
+)}
 
 {preview && (
 
