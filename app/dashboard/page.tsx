@@ -18,30 +18,26 @@ const load=async()=>{
 
 try{
 
-// drink
 const d=await getDocs(collection(db,"menu_items"))
 setDrink(d.docs.filter(v=>v.data().category==="drink").length)
 
-// food
 const f=await getDocs(collection(db,"menu_foods"))
-setFood(f.size)
+setFood(f.docs.length)
 
-// news（🔥これ重要）
 const newsSnap=await getDocs(collection(db,"news"))
 
 setNews(newsSnap.docs.length)
 
-// 🔥 安全ソート
 const sorted=newsSnap.docs
 .map(d=>d.data())
-.filter(d=>d.date && d.date.seconds) // ←これ追加
+.filter(d=>d.date && d.date.seconds)
 .sort((a,b)=>b.date.seconds - a.date.seconds)
 .slice(0,3)
 
 setLatestNews(sorted)
 
 }catch(e){
-console.log("dashboard error",e)
+console.log(e)
 }
 
 }
