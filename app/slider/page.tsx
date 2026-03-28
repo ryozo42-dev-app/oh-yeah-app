@@ -4,7 +4,7 @@ import AuthGuard from "../../components/AuthGuard"
 import { useEffect,useState } from "react"
 import {
 collection,
-getDocs,
+onSnapshot,
 doc,
 setDoc
 } from "firebase/firestore"
@@ -30,27 +30,24 @@ const [preview,setPreview] = useState("")
 
 useEffect(()=>{
 
-const load = async()=>{
+const unsubscribe = onSnapshot(
+collection(db,"slider_images"),
+(snapshot)=>{
 
-try{
-
-// 🔥 フィルタ削除（全件取得）
-const snap = await getDocs(collection(db,"slider_images"))
-
-const list = snap.docs.map(d=>({
+const list = snapshot.docs.map(d=>({
 id:d.id,
 imageUrl:d.data().imageUrl || ""
 }))
 
 setSlides(list)
 
-}catch(e){
-console.log(e)
+},
+(error)=>{
+console.log("snapshot error",error)
 }
+)
 
-}
-
-load()
+return ()=>unsubscribe()
 
 },[])
 
@@ -85,14 +82,6 @@ await setDoc(doc(db,"slider_images",currentSlide.id),{
 imageUrl:url,
 isActive:true
 })
-
-setSlides(
-slides.map(s=>
-s.id===currentSlide.id
-? {...s,imageUrl:url}
-: s
-)
-)
 
 setShowModal(false)
 
