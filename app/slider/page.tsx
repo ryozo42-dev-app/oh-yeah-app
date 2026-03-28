@@ -32,13 +32,27 @@ useEffect(()=>{
 
 const load = async()=>{
 
-// 🔥 完全固定URLで検証（これで出なければStorage確定）
-setSlides([
-{
-id:"test",
-imageUrl:"https://firebasestorage.googleapis.com/v0/b/oh-yeah-9fdc6.appspot.com/o/slider%2FKWaNZfm4ZsJbWHqAICIs.jpg?alt=media"
+const snap = await getDocs(collection(db,"slider_images"))
+
+const map:any = {}
+
+snap.docs.forEach(d=>{
+map[d.id] = d.data().imageUrl || ""
+})
+
+// 🔥 6枠固定
+const fixed = Array.from({length:6},(_,i)=>{
+
+const id = `slide${i+1}`
+
+return{
+id,
+imageUrl: map[id] || ""
 }
-])
+
+})
+
+setSlides(fixed)
 
 }
 
@@ -113,16 +127,36 @@ marginTop:"30px"
 
 <div key={s.id} style={{textAlign:"center"}}>
 
+{s.imageUrl ? (
+
 <img
 src={s.imageUrl}
 style={{
 width:"260px",
 aspectRatio:"16 / 9",
 objectFit:"cover",
-borderRadius:"8px",
-background:"#eee"
+borderRadius:"8px"
 }}
 />
+
+) : (
+
+<div
+style={{
+width:"260px",
+aspectRatio:"16 / 9",
+background:"#eee",
+borderRadius:"8px",
+display:"flex",
+alignItems:"center",
+justifyContent:"center",
+color:"#999"
+}}
+>
+画像なし
+</div>
+
+)}
 
 <button
 onClick={()=>{
@@ -172,6 +206,7 @@ textAlign:"center"
 
 <h3>画像変更</h3>
 
+{currentSlide.imageUrl && (
 <img
 src={currentSlide.imageUrl}
 style={{
@@ -180,6 +215,7 @@ aspectRatio:"16 / 9",
 objectFit:"cover"
 }}
 />
+)}
 
 {preview && (
 <img
