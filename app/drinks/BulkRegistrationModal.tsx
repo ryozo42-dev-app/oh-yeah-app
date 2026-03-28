@@ -68,7 +68,8 @@ name_en:r.name_en,
 drinkCategory:r.drinkCategory,
 description:r.description,
 price:Number(r.price),
-order:999
+order:999,
+createdAt: new Date()
 })
 
 }

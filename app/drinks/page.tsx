@@ -270,7 +270,8 @@ description:d.description,
 price:d.price===""?0:Number(d.price),
 order:999,
 isActive:true,
-category:"drink"
+    category:"drink",
+    createdAt: new Date()
 
 })
 

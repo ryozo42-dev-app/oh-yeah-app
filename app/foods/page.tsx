@@ -374,7 +374,8 @@ const addFood = async () => {
     price: Number(newFood.price),
     imageUrl,
     order: nextOrder,
-    isActive: true
+    isActive: true,
+    createdAt: new Date()
 
   })
 
@@ -858,7 +859,7 @@ style={{width:"100%"}}
 
 <input
 type="number"
-value={editFood.price === 0 ? "" : editFood.price}
+value={editFood.price}
 onChange={(e)=>setEditFood({...editFood,price:e.target.value === "" ? "" : Number(e.target.value)})}
 style={{width:"100%"}}
 />

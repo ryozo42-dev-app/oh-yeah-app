@@ -60,10 +60,6 @@ const [previewAdd,setPreviewAdd] = useState<string | null>(null)
 const [editImage,setEditImage] = useState<File | null>(null)
 const [preview,setPreview] = useState<string | null>(null)
 
-const [publishDate,setPublishDate] = useState(
-  new Date().toISOString().slice(0,16)
-)
-
 const perPage=6
 
 /* -------------------------
@@ -269,7 +265,8 @@ const addNews = async () => {
     body:newNews.body,
     imageUrl:imageUrl,
     isPublished:newNews.isPublished,
-    date:new Date()
+    date:new Date(),
+    createdAt: new Date()
 
   })
 
@@ -649,19 +646,6 @@ style={{width:"100%",height:"120px"}}
 />
 
 )}
-
-</div>
-
-<div style={{marginTop:"10px"}}>
-
-<label>公開日時</label>
-
-<input
-  type="datetime-local"
-  value={publishDate}
-  onChange={(e)=>setPublishDate(e.target.value)}
-  style={{display:"block", width:"100%", marginTop:"4px"}}
-/>
 
 </div>
 
