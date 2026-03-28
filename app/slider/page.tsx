@@ -4,7 +4,7 @@ import AuthGuard from "../../components/AuthGuard"
 import { useEffect,useState } from "react"
 import {
 collection,
-onSnapshot,
+getDocs,
 doc,
 setDoc
 } from "firebase/firestore"
@@ -30,24 +30,44 @@ const [preview,setPreview] = useState("")
 
 useEffect(()=>{
 
-const unsubscribe = onSnapshot(
-collection(db,"slider_images"),
-(snapshot)=>{
+const load = async()=>{
 
-const list = snapshot.docs.map(d=>({
+try{
+
+// 🔥 デバッグログ
+const snap = await getDocs(collection(db,"slider_images"))
+console.log("slider count:",snap.docs.length)
+console.log("slider data:",snap.docs.map(d=>d.data()))
+
+// 🔥 強制ダミー表示（データ来てるか確認）
+if(snap.docs.length === 0){
+setSlides([
+{ id:"test1", imageUrl:"https://via.placeholder.com/300x180" },
+{ id:"test2", imageUrl:"https://via.placeholder.com/300x180" }
+])
+return
+}
+
+const list = snap.docs.map(d=>({
 id:d.id,
 imageUrl:d.data().imageUrl || ""
 }))
 
 setSlides(list)
 
-},
-(error)=>{
-console.log("snapshot error",error)
-}
-)
+}catch(e){
+console.log(e)
 
-return ()=>unsubscribe()
+// 🔥 エラー時もダミー表示
+setSlides([
+{ id:"err1", imageUrl:"https://via.placeholder.com/300x180" }
+])
+
+}
+
+}
+
+load()
 
 },[])
 
@@ -82,6 +102,14 @@ await setDoc(doc(db,"slider_images",currentSlide.id),{
 imageUrl:url,
 isActive:true
 })
+
+setSlides(
+slides.map(s=>
+s.id===currentSlide.id
+? {...s,imageUrl:url}
+: s
+)
+)
 
 setShowModal(false)
 
