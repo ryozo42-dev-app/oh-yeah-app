@@ -34,10 +34,21 @@ const load = async()=>{
 
 const snap = await getDocs(collection(db,"slider_images"))
 
-const list = snap.docs.map(d=>({
+const list = snap.docs.map(d=>{
+
+let url = d.data().imageUrl || ""
+
+// 🔥 URL修正（これが本命）
+if(url.includes("firebasestorage.googleapis.com")){
+url = url.replace("/o/","/v0/b/").replace("?alt=media","")
+}
+
+return{
 id:d.id,
-imageUrl:(d.data().imageUrl || "").replace("http://","https://")
-}))
+imageUrl:url
+}
+
+})
 
 setSlides(list)
 
@@ -116,7 +127,7 @@ marginTop:"30px"
 
 <img
 src={s.imageUrl}
-onError={(e)=>{(e.target as HTMLImageElement).src="/noimage.png"}}
+onError={(e)=>{(e.target as HTMLImageElement).src="https://via.placeholder.com/300x180"}}
 style={{
 width:"260px",
 aspectRatio:"16 / 9",
