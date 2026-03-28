@@ -32,38 +32,14 @@ useEffect(()=>{
 
 const load = async()=>{
 
-try{
-
-// 🔥 デバッグログ
 const snap = await getDocs(collection(db,"slider_images"))
-console.log("slider count:",snap.docs.length)
-console.log("slider data:",snap.docs.map(d=>d.data()))
-
-// 🔥 強制ダミー表示（データ来てるか確認）
-if(snap.docs.length === 0){
-setSlides([
-{ id:"test1", imageUrl:"https://via.placeholder.com/300x180" },
-{ id:"test2", imageUrl:"https://via.placeholder.com/300x180" }
-])
-return
-}
 
 const list = snap.docs.map(d=>({
 id:d.id,
-imageUrl:d.data().imageUrl || ""
+imageUrl:(d.data().imageUrl || "").replace("http://","https://")
 }))
 
 setSlides(list)
-
-}catch(e){
-console.log(e)
-
-// 🔥 エラー時もダミー表示
-setSlides([
-{ id:"err1", imageUrl:"https://via.placeholder.com/300x180" }
-])
-
-}
 
 }
 
@@ -90,8 +66,6 @@ const saveImage = async()=>{
 
 if(!newImage || !currentSlide) return
 
-try{
-
 const storageRef = ref(storage,`slider/${currentSlide.id}.jpg`)
 
 await uploadBytes(storageRef,newImage)
@@ -112,11 +86,6 @@ s.id===currentSlide.id
 )
 
 setShowModal(false)
-
-}catch(e){
-console.log(e)
-alert("アップロード失敗")
-}
 
 }
 
@@ -147,6 +116,7 @@ marginTop:"30px"
 
 <img
 src={s.imageUrl}
+onError={(e)=>{(e.target as HTMLImageElement).src="/noimage.png"}}
 style={{
 width:"260px",
 aspectRatio:"16 / 9",
