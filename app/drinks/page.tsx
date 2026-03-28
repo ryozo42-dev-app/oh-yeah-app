@@ -77,7 +77,7 @@ name:d.name||"",
 name_en:d.name_en||"",
 drinkCategory:d.drinkCategory||"",
 description:d.description||"",
-price:d.price||0
+price: d.price ?? ""
 }
 
 })
@@ -543,8 +543,8 @@ style={{width:"100%"}}
 <label>価格</label>
 <input
 type="number"
-value={editDrink.price}
-onChange={(e)=>setEditDrink({...editDrink,price:Number(e.target.value)})}
+value={editDrink.price === 0 ? "" : editDrink.price}
+onChange={(e)=>setEditDrink({...editDrink,price:e.target.value === "" ? "" : Number(e.target.value)})}
 style={{width:"100%"}}
 />
 

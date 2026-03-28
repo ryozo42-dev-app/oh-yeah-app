@@ -1,6 +1,6 @@
 "use client"
 
-import AuthGuard from "../../components/AuthGuard"
+import AuthGuard from "@/components/AuthGuard"
 import { useEffect,useState } from "react"
 import {
 collection,
@@ -162,7 +162,7 @@ name:d.name||"",
 name_en:d.name_en||"",
 foodCategory:d.foodCategory||"",
 description:d.description||"",
-price:d.price||0,
+price:d.price || "",
 imageUrl:d.imageUrl||""
 }
 
@@ -858,8 +858,8 @@ style={{width:"100%"}}
 
 <input
 type="number"
-value={editFood.price}
-onChange={(e)=>setEditFood({...editFood,price:Number(e.target.value)})}
+value={editFood.price === 0 ? "" : editFood.price}
+onChange={(e)=>setEditFood({...editFood,price:e.target.value === "" ? "" : Number(e.target.value)})}
 style={{width:"100%"}}
 />
 
