@@ -6,7 +6,9 @@ import {
 collection,
 getDocs,
 doc,
-setDoc
+setDoc,
+query,
+where
 } from "firebase/firestore"
 import {
 ref,
@@ -34,9 +36,13 @@ const load = async()=>{
 
 try{
 
-const snap = await getDocs(collection(db,"slider_images"))
-
-console.log("slider docs:",snap.docs.length)
+// 🔥 isActive=trueのみ取得
+const snap = await getDocs(
+query(
+collection(db,"slider_images"),
+where("isActive","==",true)
+)
+)
 
 const list = snap.docs.map(d=>({
 id:d.id,
@@ -46,7 +52,7 @@ imageUrl:d.data().imageUrl || ""
 setSlides(list)
 
 }catch(e){
-console.log("slider load error",e)
+console.log(e)
 }
 
 }
@@ -112,10 +118,6 @@ return(
 
 <h1 style={{textAlign:"center"}}>Slider管理</h1>
 
-{slides.length===0 && (
-<p style={{textAlign:"center"}}>データなし</p>
-)}
-
 <div
 style={{
 maxWidth:"1000px",
@@ -134,7 +136,7 @@ marginTop:"30px"
 <div key={s.id} style={{textAlign:"center"}}>
 
 <img
-src={s.imageUrl || "/noimage.png"}
+src={s.imageUrl}
 style={{
 width:"260px",
 aspectRatio:"16 / 9",
