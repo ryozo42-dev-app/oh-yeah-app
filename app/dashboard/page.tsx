@@ -16,23 +16,33 @@ useEffect(()=>{
 
 const load=async()=>{
 
+try{
+
+// drink
 const d=await getDocs(collection(db,"menu_items"))
 setDrink(d.docs.filter(v=>v.data().category==="drink").length)
 
+// food
 const f=await getDocs(collection(db,"menu_foods"))
 setFood(f.size)
 
-const n=await getDocs(collection(db,"news"))
-setNews(n.size)
-
+// news（🔥これ重要）
 const newsSnap=await getDocs(collection(db,"news"))
 
+setNews(newsSnap.docs.length)
+
+// 🔥 安全ソート
 const sorted=newsSnap.docs
 .map(d=>d.data())
-.sort((a,b)=>b.date?.seconds-a.date?.seconds)
+.filter(d=>d.date && d.date.seconds) // ←これ追加
+.sort((a,b)=>b.date.seconds - a.date.seconds)
 .slice(0,3)
 
 setLatestNews(sorted)
+
+}catch(e){
+console.log("dashboard error",e)
+}
 
 }
 
@@ -83,7 +93,7 @@ gap:"20px"
 {latestNews.map((n,i)=>(
 
 <li key={i} style={{marginBottom:"6px"}}>
-{n.title}
+{n.title || "No Title"}
 </li>
 
 ))}
