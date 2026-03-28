@@ -1,6 +1,6 @@
 "use client"
 
-import AuthGuard from "../../components/AuthGuard"
+import AuthGuard from "@/components/AuthGuard"
 
 import { useEffect,useState } from "react"
 
@@ -22,7 +22,7 @@ getDownloadURL,
 deleteObject
 } from "firebase/storage"
 
-import { db, storage } from "../../lib/firebase"
+import { db, storage } from "@/lib/firebase"
 
 type News={
 id?:string
@@ -149,15 +149,7 @@ const load = async () => {
 
   })
 
-  const now = new Date()
-
-  const filtered = list.filter(n => {
-    if(!n.isPublished) return false
-    if(!n.date) return true
-    return n.date <= now
-  })
-
-  setNews(filtered)
+  setNews(list)
 }
 
 load()
