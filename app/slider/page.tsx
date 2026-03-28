@@ -6,9 +6,7 @@ import {
 collection,
 getDocs,
 doc,
-setDoc,
-query,
-where
+setDoc
 } from "firebase/firestore"
 import {
 ref,
@@ -36,13 +34,8 @@ const load = async()=>{
 
 try{
 
-// 🔥 isActive=trueのみ取得
-const snap = await getDocs(
-query(
-collection(db,"slider_images"),
-where("isActive","==",true)
-)
-)
+// 🔥 フィルタ削除（全件取得）
+const snap = await getDocs(collection(db,"slider_images"))
 
 const list = snap.docs.map(d=>({
 id:d.id,
