@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect,useState } from "react"
-import { collection,getDocs } from "firebase/firestore"
+import { collection,getDocs,query,where } from "firebase/firestore"
 import { db } from "../../lib/firebase"
 import AuthGuard from "../../components/AuthGuard"
 
@@ -18,20 +18,36 @@ const load=async()=>{
 
 try{
 
+// drink
 const d=await getDocs(collection(db,"menu_items"))
 setDrink(d.docs.filter(v=>v.data().category==="drink").length)
 
+// food
 const f=await getDocs(collection(db,"menu_foods"))
 setFood(f.docs.length)
 
-const newsSnap=await getDocs(collection(db,"news"))
+// 🔥 修正（公開ニュースのみ）
+const newsSnap=await getDocs(
+query(
+collection(db,"news"),
+where("isPublished","==",true)
+)
+)
 
 setNews(newsSnap.docs.length)
 
+// 🔥 publishAt / date 両対応
 const sorted=newsSnap.docs
 .map(d=>d.data())
-.filter(d=>d.date && d.date.seconds)
-.sort((a,b)=>b.date.seconds - a.date.seconds)
+.filter(d=>(d.publishAt || d.date))
+.sort((a,b)=>{
+
+const aTime=(a.publishAt?.seconds || a.date?.seconds || 0)
+const bTime=(b.publishAt?.seconds || b.date?.seconds || 0)
+
+return bTime - aTime
+
+})
 .slice(0,3)
 
 setLatestNews(sorted)
