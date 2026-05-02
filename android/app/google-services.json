@@ -1,0 +1,143 @@
+{
+  "project_info": {
+    "project_number": "642657130095",
+    "project_id": "oh-yeah-9fdc6",
+    "storage_bucket": "oh-yeah-9fdc6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:642657130095:android:2df826001b1c10f51c9f9a",
+        "android_client_info": {
+          "package_name": "com.example.bar_app_new"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYxooaCGo3WC0Xq96fRcgIw34A9ewewCA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:642657130095:android:b1c093b6ddd3b94d1c9f9a",
+        "android_client_info": {
+          "package_name": "com.example.oh_yeah"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYxooaCGo3WC0Xq96fRcgIw34A9ewewCA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:642657130095:android:55bb7d29eb4cd6561c9f9a",
+        "android_client_info": {
+          "package_name": "com.example.oh_yeah_admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYxooaCGo3WC0Xq96fRcgIw34A9ewewCA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:642657130095:android:20f0b5425e69aa7f1c9f9a",
+        "android_client_info": {
+          "package_name": "com.example.oh_yeah_admin2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYxooaCGo3WC0Xq96fRcgIw34A9ewewCA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:642657130095:android:d998bfeb81109a9f1c9f9a",
+        "android_client_info": {
+          "package_name": "com.example.oh_yeah_import_tool"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYxooaCGo3WC0Xq96fRcgIw34A9ewewCA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:642657130095:android:9bc55e52b7fc502e1c9f9a",
+        "android_client_info": {
+          "package_name": "com.example.oh_yeah_new"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYxooaCGo3WC0Xq96fRcgIw34A9ewewCA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:642657130095:android:d025f5ae8444aa4b1c9f9a",
+        "android_client_info": {
+          "package_name": "com.ryozo.ohyeah"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYxooaCGo3WC0Xq96fRcgIw34A9ewewCA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
