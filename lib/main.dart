@@ -32,11 +32,8 @@ Future<void> main() async {
 
   print('APNS TOKEN: $apnsToken');
 
-  // 🔥 一旦 FCM TOKEN は止める
-  // final fcmToken =
-  //     await FirebaseMessaging.instance.getToken();
-  //
-  // print('FCM TOKEN: $fcmToken');
+  final fcmToken = await FirebaseMessaging.instance.getToken();
+  print('🔥 FCM TOKEN: $fcmToken');
 
   // Supabase 初期化
   await Supabase.initialize(
