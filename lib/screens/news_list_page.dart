@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:oh_yeah/screens/news_detail_page.dart';
 
@@ -115,7 +116,7 @@ class NewsListPage extends StatelessWidget {
 
               // INSTAGRAM
               _bottomItem(
-                icon: Icons.camera_alt,
+                icon: FontAwesomeIcons.instagram,
                 label: "Instagram",
                 onTap: _openInstagram,
               ),

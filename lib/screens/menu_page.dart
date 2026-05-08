@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:oh_yeah/screens/food_detail_page.dart';
 import 'package:oh_yeah/screens/news_list_page.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class MenuPage extends StatefulWidget {
   const MenuPage({super.key});
@@ -311,7 +312,7 @@ class _MenuPageState extends State<MenuPage>
                 label: 'FACEBOOK',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.camera_alt),
+                icon: Icon(FontAwesomeIcons.instagram),
                 label: 'Instagram',
               ),
             ],
@@ -449,27 +450,37 @@ class _MenuPageState extends State<MenuPage>
 
     return Center(
       child: Container(
-        width: 220,
+        width: 260,
         padding: const EdgeInsets.symmetric(
-          horizontal: 12,
+          horizontal: 14,
         ),
         decoration: BoxDecoration(
-          color: const Color(0xFFF1ECEF),
-          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: const Color(0xFF5C3A2E),
+            width: 2.2,
+          ),
         ),
         child: DropdownButtonHideUnderline(
           child: DropdownButton<String>(
             value: value,
             isExpanded: true,
-            alignment: Alignment.center,
-            items: categories.map((e) {
+            dropdownColor: Colors.white,
+            icon: const Icon(
+              Icons.keyboard_arrow_down,
+              color: Color(0xFF5C3A2E),
+            ),
+            style: const TextStyle(
+              color: Color(0xFF5C3A2E),
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+            items: categories.map((c) {
               return DropdownMenuItem(
-                value: e,
+                value: c,
                 child: Center(
-                  child: Text(
-                    e,
-                    textAlign: TextAlign.center,
-                  ),
+                  child: Text(c),
                 ),
               );
             }).toList(),
@@ -495,15 +506,16 @@ class _MenuPageState extends State<MenuPage>
       padding: const EdgeInsets.all(14),
 
       decoration: BoxDecoration(
-        color: const Color(0xFFF7F5F4),
-        borderRadius:
-            BorderRadius.circular(14),
-
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: const Color(0xFF5C3A2E),
+          width: 1.4,
+        ),
         boxShadow: [
           BoxShadow(
-            color:
-                Colors.black.withValues(alpha: 0.08),
-            blurRadius: 6,
+            color: Colors.black12,
+            blurRadius: 4,
             offset: const Offset(0, 2),
           ),
         ],
@@ -604,17 +616,17 @@ class _MenuPageState extends State<MenuPage>
             const EdgeInsets.all(12),
 
         decoration: BoxDecoration(
-          color: const Color(0xFFF7F5F4),
-          borderRadius:
-              BorderRadius.circular(14),
-
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: const Color(0xFF5C3A2E),
+            width: 1.4,
+          ),
           boxShadow: [
             BoxShadow(
-              color:
-                  Colors.black.withValues(alpha: 0.08),
-              blurRadius: 6,
-              offset:
-                  const Offset(0, 2),
+              color: Colors.black12,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
           ],
         ),

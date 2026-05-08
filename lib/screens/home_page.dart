@@ -5,11 +5,11 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:oh_yeah/screens/news_list_page.dart';
 import 'package:oh_yeah/screens/menu_page.dart';
+import 'package:oh_yeah/screens/news_detail_page.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({
-    super.key,
-  });
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -86,15 +86,11 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: bgColor,
 
-      // 🔥 BottomNavigation追加
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: buttonColor,
           border: const Border(
-            top: BorderSide(
-              color: Color(0xFFD8D8D8),
-              width: 1,
-            ),
+            top: BorderSide(color: Color(0xFFD8D8D8), width: 1),
           ),
         ),
         padding: EdgeInsets.only(
@@ -104,15 +100,12 @@ class _HomePageState extends State<HomePage> {
           height: 72,
           child: Row(
             children: [
-              // HOME
               _bottomItem(
                 icon: Icons.home,
                 label: "HOME",
                 isActive: true,
                 onTap: () {},
               ),
-
-              // NEWS
               _bottomItem(
                 icon: Icons.article,
                 label: "NEWS",
@@ -125,8 +118,6 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
-
-              // FACEBOOK
               _bottomItem(
                 icon: Icons.facebook,
                 label: "FACEBOOK",
@@ -136,14 +127,12 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
-
-              // INSTAGRAM
               _bottomItem(
-                icon: Icons.camera_alt,
+                icon: FontAwesomeIcons.instagram,
                 label: "Instagram",
                 onTap: () {
                   _openUrl(
-                    'https://www.instagram.com/oh_yeah_mihama?igsh=MWo2NmY4NmNhZXl1cQ==',
+                    'https://www.instagram.com/oh_yeah_mihama',
                   );
                 },
               ),
@@ -160,10 +149,7 @@ class _HomePageState extends State<HomePage> {
             width: double.infinity,
             height: 200,
             color: headerColor,
-            padding: const EdgeInsets.only(
-              top: 45,
-              bottom: 15,
-            ),
+            padding: const EdgeInsets.only(top: 45, bottom: 15),
             child: Center(
               child: Image.asset(
                 'assets/images/logo.png',
@@ -175,16 +161,14 @@ class _HomePageState extends State<HomePage> {
 
           Expanded(
             child: _docs.isEmpty
-                ? const Center(
-                    child: CircularProgressIndicator(),
-                  )
+                ? const Center(child: CircularProgressIndicator())
                 : SingleChildScrollView(
                     child: Column(
                       children: [
 
                         const SizedBox(height: 30),
 
-                        // スライダー
+                        // 🔥 スライダー
                         SizedBox(
                           height: 260,
                           child: PageView.builder(
@@ -203,37 +187,23 @@ class _HomePageState extends State<HomePage> {
                                   _docs[realIndex];
 
                               final imageUrl =
-                                  data['imageUrl']
-                                      as String?;
+                                  data['imageUrl'] as String?;
+
+                              final newsId = data['newsId'];
+
+                              // 🔥 ここが超重要（正しい位置）
+                              final isLinkActive =
+                                  data['isActive'] ?? true;
 
                               if (imageUrl == null ||
                                   imageUrl.isEmpty) {
                                 return const SizedBox();
                               }
 
-                              return AnimatedContainer(
-                                duration: const Duration(
-                                  milliseconds: 300,
-                                ),
-                                margin:
-                                    const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
-                                child: ClipRRect(
-                                  borderRadius:
-                                      BorderRadius.circular(
-                                    20,
-                                  ),
-                                  child: SizedBox(
-                                    width: double.infinity,
-                                    height: 260,
-                                    child:
-                                        CachedNetworkImage(
-                                      imageUrl: imageUrl,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
+                              return _SliderItem(
+                                imageUrl: imageUrl,
+                                newsId: newsId,
+                                isLinkActive: isLinkActive,
                               );
                             },
                           ),
@@ -241,15 +211,13 @@ class _HomePageState extends State<HomePage> {
 
                         const SizedBox(height: 16),
 
-                        // インジケーター
                         SmoothPageIndicator(
                           controller: _controller,
                           count: _docs.length,
                           effect: WormEffect(
                             dotHeight: 8,
                             dotWidth: 8,
-                            activeDotColor:
-                                buttonColor,
+                            activeDotColor: buttonColor,
                           ),
                         ),
 
@@ -258,15 +226,12 @@ class _HomePageState extends State<HomePage> {
                         // MENU / MAP
                         Padding(
                           padding:
-                              const EdgeInsets.symmetric(
-                            horizontal: 20,
-                          ),
+                              const EdgeInsets.symmetric(horizontal: 20),
                           child: Row(
                             children: [
 
                               _menuButton(
-                                icon:
-                                    Icons.restaurant_menu,
+                                icon: Icons.restaurant_menu,
                                 label: "MENU",
                                 onTap: () {
                                   Navigator.push(
@@ -278,9 +243,7 @@ class _HomePageState extends State<HomePage> {
                                 },
                               ),
 
-                              const SizedBox(
-                                width: 14,
-                              ),
+                              const SizedBox(width: 14),
 
                               _menuButton(
                                 icon: Icons.map,
@@ -313,34 +276,21 @@ class _HomePageState extends State<HomePage> {
     return Expanded(
       child: Material(
         color: buttonColor,
-        borderRadius:
-            BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(18),
         child: InkWell(
           onTap: onTap,
-          borderRadius:
-              BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18),
           child: Padding(
-            padding:
-                const EdgeInsets.symmetric(
-              vertical: 28,
-            ),
+            padding: const EdgeInsets.symmetric(vertical: 28),
             child: Column(
               children: [
-
-                Icon(
-                  icon,
-                  color: Colors.white,
-                  size: 34,
-                ),
-
+                Icon(icon, color: Colors.white, size: 34),
                 const SizedBox(height: 10),
-
                 Text(
                   label,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontWeight:
-                        FontWeight.bold,
+                    fontWeight: FontWeight.bold,
                     fontSize: 17,
                   ),
                 ),
@@ -365,24 +315,87 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment:
               MainAxisAlignment.center,
           children: [
-
-            Icon(
-              icon,
-              size: 30,
-              color: Colors.white,
-            ),
-
+            Icon(icon, size: 30, color: Colors.white),
             const SizedBox(height: 4),
-
             Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// 🔥 スライダーアイテム
+class _SliderItem extends StatefulWidget {
+  final String imageUrl;
+  final dynamic newsId;
+  final bool isLinkActive;
+
+  const _SliderItem({
+    required this.imageUrl,
+    required this.newsId,
+    required this.isLinkActive,
+  });
+
+  @override
+  State<_SliderItem> createState() => _SliderItemState();
+}
+
+class _SliderItemState extends State<_SliderItem> {
+  double _scale = 1.0;
+
+  void _onTapDown(TapDownDetails _) {
+    if (!mounted || !widget.isLinkActive) return;
+    setState(() => _scale = 0.95);
+  }
+
+  void _onTapUp(TapUpDetails _) {
+    if (!mounted || !widget.isLinkActive) return;
+    setState(() => _scale = 1.0);
+  }
+
+  void _onTapCancel() {
+    if (!mounted || !widget.isLinkActive) return;
+    setState(() => _scale = 1.0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.isLinkActive && widget.newsId != null
+          ? () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => NewsDetailPage(
+                    id: widget.newsId.toString(),
+                  ),
+                ),
+              );
+            }
+          : null,
+      onTapDown: widget.isLinkActive ? _onTapDown : null,
+      onTapUp: widget.isLinkActive ? _onTapUp : null,
+      onTapCancel: widget.isLinkActive ? _onTapCancel : null,
+      child: AnimatedScale(
+        scale: _scale,
+        duration: const Duration(milliseconds: 150),
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 8),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: CachedNetworkImage(
+              imageUrl: widget.imageUrl,
+              fit: BoxFit.cover,
+            ),
+          ),
         ),
       ),
     );

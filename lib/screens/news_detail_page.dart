@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide CarouselController;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class NewsDetailPage extends StatelessWidget {
   final String id;
@@ -92,6 +93,7 @@ class NewsDetailPage extends StatelessWidget {
           height: 72,
           child: Row(
             children: [
+
               // HOME
               _bottomItem(
                 icon: Icons.home,
@@ -123,7 +125,7 @@ class NewsDetailPage extends StatelessWidget {
 
               // INSTAGRAM
               _bottomItem(
-                icon: Icons.camera_alt,
+                icon: FontAwesomeIcons.instagram,
                 label: "Instagram",
                 onTap: _openInstagram,
               ),
@@ -199,9 +201,11 @@ class NewsDetailPage extends StatelessWidget {
                       Text(
                         createdAt,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 15,
+                          fontWeight:
+                              FontWeight.w500,
                           color:
-                              Colors.grey[700],
+                              Colors.black87,
                         ),
                       ),
 
@@ -214,13 +218,12 @@ class NewsDetailPage extends StatelessWidget {
                         title,
                         style:
                             const TextStyle(
-                          fontSize: 26,
+                          fontSize: 28,
                           fontWeight:
                               FontWeight.bold,
-                          color: Color(
-                            0xFF4E3329,
-                          ),
-                          height: 1.4,
+                          color:
+                              Colors.black87,
+                          height: 1.5,
                         ),
                       ),
 
@@ -231,10 +234,13 @@ class NewsDetailPage extends StatelessWidget {
                       // 本文
                       Text(
                         data['body'] ?? '',
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 18,
-                          height: 1.6,
+                        style:
+                            const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color:
+                              Colors.black87,
+                          height: 1.7,
                         ),
                       ),
 

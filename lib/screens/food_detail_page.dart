@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:oh_yeah/screens/news_list_page.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class FoodDetailPage extends StatelessWidget {
 
@@ -81,7 +82,7 @@ class FoodDetailPage extends StatelessWidget {
                 label: 'FACEBOOK',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.camera_alt),
+                icon: Icon(FontAwesomeIcons.instagram),
                 label: 'Instagram',
               ),
             ],
