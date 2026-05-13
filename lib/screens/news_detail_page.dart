@@ -136,7 +136,7 @@ class NewsDetailPage extends StatelessWidget {
 
       body: FutureBuilder(
         future: supabase
-            .from('news')
+            .from('world_news')
             .select()
             .eq('id', id)
             .single(),
@@ -154,15 +154,18 @@ class NewsDetailPage extends StatelessWidget {
               snapshot.data
                   as Map<String, dynamic>;
 
-          final title =
-              data['title'] ?? '';
+          final titleJa =
+              data['title_ja'] ?? '';
+
+          final titleEn =
+              data['title_en'] ?? '';
 
           final imageUrl =
-              data['imageUrl'];
+              data['imageurl'];
 
           final createdAt =
               _formatDate(
-            data['createdAt'],
+            data['createdat'],
           );
 
           return SingleChildScrollView(
@@ -213,34 +216,57 @@ class NewsDetailPage extends StatelessWidget {
                         height: 12,
                       ),
 
-                      // タイトル
+                      // 日本語タイトル
+
                       Text(
-                        title,
-                        style:
-                            const TextStyle(
-                          fontSize: 28,
-                          fontWeight:
-                              FontWeight.bold,
-                          color:
-                              Colors.black87,
+                        titleJa,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
                           height: 1.5,
                         ),
                       ),
 
-                      const SizedBox(
-                        height: 24,
+                      const SizedBox(height: 18),
+
+                      // 日本語本文
+
+                      Text(
+                        data['body_ja'] ?? '',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                          height: 1.8,
+                        ),
                       ),
 
-                      // 本文
+                      const SizedBox(height: 36),
+
+                      // 英語タイトル
+
                       Text(
-                        data['body'] ?? '',
-                        style:
-                            const TextStyle(
-                          fontSize: 17,
+                        titleEn,
+                        style: const TextStyle(
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color:
-                              Colors.black87,
-                          height: 1.7,
+                          color: Colors.black87,
+                          height: 1.5,
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      // 英語本文
+
+                      Text(
+                        data['body_en'] ?? '',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                          height: 1.8,
                         ),
                       ),
 

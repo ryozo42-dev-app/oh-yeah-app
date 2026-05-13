@@ -127,7 +127,7 @@ class NewsListPage extends StatelessWidget {
 
       body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: supabase
-            .from('news')
+            .from('world_news')
             .stream(primaryKey: ['id']),
         builder: (context, snapshot) {
 
@@ -184,15 +184,18 @@ class NewsListPage extends StatelessWidget {
 
               final data = docs[index];
 
-              final title =
-                  data['title'] ?? '';
+              final titleJa =
+                  data['title_ja'] ?? '';
+
+              final titleEn =
+                  data['title_en'] ?? '';
 
               final imageUrl =
-                  data['imageUrl'];
+                  data['imageurl'];
 
               final createdAt =
                   _formatDate(
-                data['createdAt'],
+                data['createdat'],
               );
 
               return InkWell(
@@ -234,12 +237,12 @@ class NewsListPage extends StatelessWidget {
                             ? Image.network(
                                 imageUrl,
                                 width: 110,
-                                height: 80,
+                                height: 100,
                                 fit: BoxFit.cover,
                               )
                             : Container(
                                 width: 110,
-                                height: 80,
+                                height: 100,
                                 color: Colors.grey,
                               ),
                       ),
@@ -248,55 +251,52 @@ class NewsListPage extends StatelessWidget {
 
                       // 右側
                       Expanded(
-                        child: SizedBox(
-                          height: 80,
 
-                          child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment
-                                    .start,
+                        child: Column(
+                          crossAxisAlignment:
+                              CrossAxisAlignment
+                                  .start,
 
-                            children: [
+                          children: [
 
-                              // タイトル
-                              Expanded(
-                                child: Text(
-                                  title,
-                                  maxLines: 2,
-                                  overflow:
-                                      TextOverflow
-                                          .ellipsis,
-                                  style:
-                                      const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight:
-                                        FontWeight
-                                            .bold,
-                                    color: Color(
-                                      0xFF4E3329,
-                                    ),
-                                  ),
+                            Text(
+                              titleJa,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF4E3329),
+                              ),
+                            ),
+
+                            const SizedBox(height: 4),
+
+                            Text(
+                              titleEn,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF4E3329),
+                              ),
+                            ),
+
+                            const SizedBox(height: 8),
+
+                            Align(
+                              alignment: Alignment.bottomRight,
+                              child: Text(
+                                createdAt,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey[700],
                                 ),
                               ),
-
-                              // 日付
-                              Align(
-                                alignment:
-                                    Alignment
-                                        .bottomRight,
-                                child: Text(
-                                  createdAt,
-                                  style:
-                                      TextStyle(
-                                    fontSize: 13,
-                                    color: Colors
-                                        .grey[700],
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
+                          ],
                           ),
-                        ),
                       ),
                     ],
                   ),
