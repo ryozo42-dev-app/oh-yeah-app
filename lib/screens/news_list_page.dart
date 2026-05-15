@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:oh_yeah/app_language.dart';
 
 import 'package:oh_yeah/screens/news_detail_page.dart';
 
 class NewsListPage extends StatelessWidget {
-  const NewsListPage({super.key});
+  final String selectedLanguageMode;
+
+  const NewsListPage({
+    super.key,
+    required this.selectedLanguageMode,
+  });
 
   Future<void> _openFacebook() async {
     final Uri url = Uri.parse(
@@ -184,12 +190,6 @@ class NewsListPage extends StatelessWidget {
 
               final data = docs[index];
 
-              final titleJa =
-                  data['title_ja'] ?? '';
-
-              final titleEn =
-                  data['title_en'] ?? '';
-
               final imageUrl =
                   data['imageurl'];
 
@@ -258,30 +258,52 @@ class NewsListPage extends StatelessWidget {
                                   .start,
 
                           children: [
-
-                            Text(
-                              titleJa,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF4E3329),
+                            if (AppLanguage.selectedLanguageMode == 'western') ...[
+                              Text(
+                                data['title_ja'] ?? '',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF4E3329),
+                                ),
                               ),
-                            ),
-
-                            const SizedBox(height: 4),
-
-                            Text(
-                              titleEn,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF4E3329),
+                              const SizedBox(height: 4),
+                              Text(
+                                data['title_en'] ?? '',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF4E3329),
+                                ),
                               ),
-                            ),
+                            ],
+                            if (AppLanguage.selectedLanguageMode == 'asian') ...[
+                              Text(
+                                data['title_zh'] ?? '',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF4E3329),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                data['title_ko'] ?? '',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF4E3329),
+                                ),
+                              ),
+                            ],
 
                             const SizedBox(height: 8),
 

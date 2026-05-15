@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' hide CarouselController;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:oh_yeah/app_language.dart';
 
 class NewsDetailPage extends StatelessWidget {
   final String id;
@@ -154,12 +155,6 @@ class NewsDetailPage extends StatelessWidget {
               snapshot.data
                   as Map<String, dynamic>;
 
-          final titleJa =
-              data['title_ja'] ?? '';
-
-          final titleEn =
-              data['title_en'] ?? '';
-
           final imageUrl =
               data['imageurl'];
 
@@ -216,59 +211,97 @@ class NewsDetailPage extends StatelessWidget {
                         height: 12,
                       ),
 
-                      // 日本語タイトル
-
-                      Text(
-                        titleJa,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                          height: 1.5,
+                      if (AppLanguage.selectedLanguageMode == 'western') ...[
+                        // 日本語タイトル
+                        Text(
+                          data['title_ja'] ?? '',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                            height: 1.5,
+                          ),
                         ),
-                      ),
-
-                      const SizedBox(height: 18),
-
-                      // 日本語本文
-
-                      Text(
-                        data['body_ja'] ?? '',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                          height: 1.8,
+                        const SizedBox(height: 18),
+                        // 日本語本文
+                        Text(
+                          data['body_ja'] ?? '',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                            height: 1.8,
+                          ),
                         ),
-                      ),
-
-                      const SizedBox(height: 36),
-
-                      // 英語タイトル
-
-                      Text(
-                        titleEn,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                          height: 1.5,
+                        const SizedBox(height: 36),
+                        // 英語タイトル
+                        Text(
+                          data['title_en'] ?? '',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                            height: 1.5,
+                          ),
                         ),
-                      ),
-
-                      const SizedBox(height: 18),
-
-                      // 英語本文
-
-                      Text(
-                        data['body_en'] ?? '',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                          height: 1.8,
+                        const SizedBox(height: 18),
+                        // 英語本文
+                        Text(
+                          data['body_en'] ?? '',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                            height: 1.8,
+                          ),
                         ),
-                      ),
+                      ],
+
+                      if (AppLanguage.selectedLanguageMode == 'asian') ...[
+                        // 中国語タイトル
+                        Text(
+                          data['title_zh'] ?? '',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                            height: 1.5,
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                        // 中国語本文
+                        Text(
+                          data['body_zh'] ?? '',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                            height: 1.8,
+                          ),
+                        ),
+                        const SizedBox(height: 36),
+                        // 韓国語タイトル
+                        Text(
+                          data['title_ko'] ?? '',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                            height: 1.5,
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                        // 韓国語本文
+                        Text(
+                          data['body_ko'] ?? '',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                            height: 1.8,
+                          ),
+                        ),
+                      ],
 
                       const SizedBox(
                         height: 40,

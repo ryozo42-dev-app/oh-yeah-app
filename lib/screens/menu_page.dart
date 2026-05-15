@@ -4,9 +4,13 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:oh_yeah/screens/food_detail_page.dart';
 import 'package:oh_yeah/screens/news_list_page.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:oh_yeah/app_language.dart';
 
 class MenuPage extends StatefulWidget {
-  const MenuPage({super.key});
+  final String selectedLanguageMode;
+
+  const MenuPage({super.key, required this.selectedLanguageMode});
 
   @override
   State<MenuPage> createState() => _MenuPageState();
@@ -15,6 +19,7 @@ class MenuPage extends StatefulWidget {
 class _MenuPageState extends State<MenuPage>
     with SingleTickerProviderStateMixin {
 
+  final NumberFormat formatter = NumberFormat('#,###');
   final supabase = Supabase.instance.client;
 
   late TabController _tabController;
@@ -57,7 +62,7 @@ class _MenuPageState extends State<MenuPage>
         .order('display_order');
 
     final data = await supabase
-        .from('menu_drinks')
+        .from('world_drinks')
         .select()
         .eq('isactive', true);
 
@@ -95,10 +100,10 @@ class _MenuPageState extends State<MenuPage>
       }
 
       // 名前順
-      return (a['name'] ?? '')
+      return (a['name_ja'] ?? '')
           .toString()
           .compareTo(
-            (b['name'] ?? '')
+            (b['name_ja'] ?? '')
                 .toString(),
           );
     });
@@ -134,7 +139,7 @@ class _MenuPageState extends State<MenuPage>
         .order('display_order');
 
     final data = await supabase
-        .from('menu_foods')
+        .from('world_foods')
         .select()
         .eq('isactive', true);
 
@@ -173,10 +178,10 @@ class _MenuPageState extends State<MenuPage>
 
       // 名前順
       final nameCompare =
-          (a['name'] ?? '')
+          (a['name_ja'] ?? '')
               .toString()
               .compareTo(
-                (b['name'] ?? '')
+                (b['name_ja'] ?? '')
                     .toString(),
               );
 
@@ -279,7 +284,9 @@ class _MenuPageState extends State<MenuPage>
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const NewsListPage(),
+                    builder: (_) => NewsListPage(
+                      selectedLanguageMode: widget.selectedLanguageMode,
+                    ),
                   ),
                 );
               }
@@ -301,11 +308,11 @@ class _MenuPageState extends State<MenuPage>
             items: const [
               BottomNavigationBarItem(
                 icon: Icon(Icons.home),
-                label: 'HOME',
+                label: 'HOME', // 必要に応じてここも多言語化
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.article),
-                label: 'NEWS',
+                label: 'NEWS', // 必要に応じてここも多言語化
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.facebook),
@@ -348,10 +355,7 @@ class _MenuPageState extends State<MenuPage>
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
 
-          tabs: const [
-            Tab(text: 'Drink'),
-            Tab(text: 'Food'),
-          ],
+          tabs: const [Tab(text: 'Drink'), Tab(text: 'Food')],
         ),
       ),
 
@@ -530,54 +534,57 @@ class _MenuPageState extends State<MenuPage>
                   CrossAxisAlignment.start,
 
               children: [
-
-                Text(
-                  item['name'] ?? '',
-
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight:
-                        FontWeight.bold,
-                    color: Colors.black,
+                if (AppLanguage.selectedLanguageMode == 'western') ...[
+                  // Japanese name
+                  Text(
+                    item['name_ja'] ?? '',
+                    style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
                   ),
-                ),
-
-                const SizedBox(height: 4),
-
-                Text(
-                  item['name_en'] ?? '',
-
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight:
-                        FontWeight.w600,
-                    color: Colors.black,
+                  const SizedBox(height: 4),
+                  // English name
+                  Text(
+                    item['name_en'] ?? '',
+                    style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
                   ),
-                ),
-
+                ],
+                if (AppLanguage.selectedLanguageMode == 'asian') ...[
+                  // Chinese name
+                  Text(
+                    item['name_zh'] ?? '',
+                    style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
+                  ),
+                  const SizedBox(height: 4),
+                  // Korean name
+                  Text(
+                    item['name_ko'] ?? '',
+                    style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
+                  ),
+                ],
                 const SizedBox(height: 6),
-
-                Text(
-                  item['description'] ?? '',
-
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 13,
-                  ),
-                ),
+                Text(item['description'] ?? '',
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 13,
+                    )),
               ],
             ),
           ),
-
           Text(
-            '¥${item['price']}',
-
+            '¥${formatter.format(item['price'] ?? 0)}',
             style: const TextStyle(
-              fontSize: 18,
-              fontWeight:
-                  FontWeight.bold,
-              color: Colors.black,
-            ),
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
           ),
         ],
       ),
@@ -589,32 +596,23 @@ class _MenuPageState extends State<MenuPage>
   // =========================
 
   Widget _foodCard(dynamic item) {
-
     return GestureDetector(
-
       onTap: () {
-
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) =>
-                FoodDetailPage(
+            builder: (_) => FoodDetailPage(
               data: item,
             ),
           ),
         );
       },
-
       child: Container(
-        margin:
-            const EdgeInsets.symmetric(
+        margin: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 6,
         ),
-
-        padding:
-            const EdgeInsets.all(12),
-
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
@@ -630,73 +628,72 @@ class _MenuPageState extends State<MenuPage>
             ),
           ],
         ),
-
         child: Row(
           children: [
-
-            if (item['image_url'] != null &&
-                item['image_url']
-                    .toString()
-                    .isNotEmpty)
-
+            if (item['imageurl'] != null && item['imageurl'].toString().isNotEmpty)
               ClipRRect(
-                borderRadius:
-                    BorderRadius.circular(
+                borderRadius: BorderRadius.circular(
                   10,
                 ),
-
                 child: Image.network(
-                  item['image_url'],
-
+                  item['imageurl'],
                   width: 90,
                   height: 90,
                   fit: BoxFit.cover,
                 ),
               ),
-
-            SizedBox(width: 12),
-
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
-
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
-                  Text(
-                    item['name'] ?? '',
-
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight:
-                          FontWeight.bold,
-                      color: Colors.black,
+                  if (AppLanguage.selectedLanguageMode == 'western') ...[
+                    // Japanese name
+                    Text(
+                      item['name_ja'] ?? '',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                     ),
-                  ),
-
-                  const SizedBox(height: 4),
-
-                  Text(
-                    item['name_en'] ?? '',
-
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight:
-                          FontWeight.bold,
-                      color: Colors.black,
+                    const SizedBox(height: 4),
+                    // English name
+                    Text(
+                      item['name_en'] ?? '',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                     ),
-                  ),
-
+                  ],
+                  if (AppLanguage.selectedLanguageMode == 'asian') ...[
+                    // Chinese name
+                    Text(
+                      item['name_zh'] ?? '',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    // Korean name
+                    Text(
+                      item['name_ko'] ?? '',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 6),
-
                   Text(
                     item['description'] ?? '',
-
                     maxLines: 2,
-
-                    overflow:
-                        TextOverflow.ellipsis,
-
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: Colors.black,
                     ),
@@ -704,16 +701,12 @@ class _MenuPageState extends State<MenuPage>
                 ],
               ),
             ),
-
             const SizedBox(width: 10),
-
             Text(
-              '¥${item['price']}',
-
+              '¥${formatter.format(item['price'] ?? 0)}',
               style: const TextStyle(
                 fontSize: 18,
-                fontWeight:
-                    FontWeight.bold,
+                fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
             ),

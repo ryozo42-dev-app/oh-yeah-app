@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:oh_yeah/screens/news_list_page.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:oh_yeah/app_language.dart';
+import 'package:intl/intl.dart';
 
 class FoodDetailPage extends StatelessWidget {
 
   final Map data;
+  static final NumberFormat _formatter = NumberFormat('#,###');
 
   const FoodDetailPage({
     super.key,
@@ -49,7 +52,9 @@ class FoodDetailPage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const NewsListPage(),
+                    builder: (_) => NewsListPage(
+                      selectedLanguageMode: AppLanguage.selectedLanguageMode,
+                    ),
                   ),
                 );
               }
@@ -121,10 +126,10 @@ class FoodDetailPage extends StatelessWidget {
 
           children: [
 
-            if (data['image_url'] != null)
+            if (data['imageurl'] != null)
 
               Image.network(
-                data['image_url'],
+                data['imageurl'],
                 width: double.infinity,
                 height: 260,
                 fit: BoxFit.cover,
@@ -140,37 +145,46 @@ class FoodDetailPage extends StatelessWidget {
 
                 children: [
 
-                  Text(
-                    data['name'] ?? '',
-
-                    style:
-                        const TextStyle(
-                      fontSize: 34,
-                      fontWeight:
-                          FontWeight.bold,
-                      color: Colors.black,
+                  if (AppLanguage.selectedLanguageMode == 'western') ...[
+                    Text(
+                      data['name_ja'] ?? '', // Japanese name
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                     ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  Text(
-                    data['name_en'] ?? '',
-
-                    style:
-                        const TextStyle(
-                      fontSize: 22,
-                      fontWeight:
-                          FontWeight.bold,
-                      color: Colors.black,
+                    const SizedBox(height: 8),
+                    Text(
+                      data['name_en'] ?? '', // English name
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                     ),
-                  ),
-
-                  const SizedBox(height: 24),
-
+                  ],
+                  if (AppLanguage.selectedLanguageMode == 'asian') ...[
+                    Text(
+                      data['name_zh'] ?? '', // Chinese name
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      data['name_ko'] ?? '', // Korean name
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
                   Text(
                     data['description'] ?? '',
-
                     style:
                         const TextStyle(
                       fontSize: 20,
@@ -178,15 +192,12 @@ class FoodDetailPage extends StatelessWidget {
                       height: 1.6,
                     ),
                   ),
-
                   const SizedBox(height: 30),
-
                   Text(
-                    '¥${data['price']}',
-
+                    '¥${_formatter.format(data['price'] ?? 0)}',
                     style:
                         const TextStyle(
-                      fontSize: 38,
+                      fontSize: 32,
                       fontWeight:
                           FontWeight.bold,
                       color: Colors.black,

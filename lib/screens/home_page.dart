@@ -7,6 +7,7 @@ import 'package:oh_yeah/screens/news_list_page.dart';
 import 'package:oh_yeah/screens/menu_page.dart';
 import 'package:oh_yeah/screens/news_detail_page.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:oh_yeah/app_language.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -29,6 +30,7 @@ class _HomePageState extends State<HomePage> {
 
   List<dynamic> _docs = [];
 
+  
   @override
   void initState() {
     super.initState();
@@ -113,7 +115,9 @@ class _HomePageState extends State<HomePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const NewsListPage(),
+                      builder: (_) => NewsListPage(
+                        selectedLanguageMode: AppLanguage.selectedLanguageMode,
+                      ),
                     ),
                   );
                 },
@@ -165,13 +169,68 @@ class _HomePageState extends State<HomePage> {
                 : SingleChildScrollView(
                     child: Column(
                       children: [
+                        const SizedBox(height: 20),
 
-                        const SizedBox(height: 30),
+                        // 🌐 言語切替
+                        Center(
+                          child: Container(
+                            width: 260,
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: const Color(0xFF5C3A2E),
+                                width: 2,
+                              ),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: AppLanguage.selectedLanguageMode,
+                                isExpanded: true,
+                                dropdownColor: Colors.white,
+                                icon: const Icon(
+                                  Icons.keyboard_arrow_down,
+                                  color: Color(0xFF5C3A2E),
+                                ),
+                                style: const TextStyle(
+                                  color: Color(0xFF5C3A2E),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                items: const [
+
+                                  DropdownMenuItem(
+                                    value: 'western',
+                                    child: Center(
+                                      child: Text('🌐 日本語 / English'),
+                                    ),
+                                  ),
+
+                                  DropdownMenuItem(
+                                    value: 'asian',
+                                    child: Center(
+                                      child: Text('🌐 繁體中文 / 한국어'),
+                                    ),
+                                  ),
+                                ],
+                                onChanged: (value) {
+                                  setState(() {
+                                    AppLanguage.selectedLanguageMode = value!;
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 26),
 
                         // 🔥 スライダー
                         SizedBox(
                           height: 260,
                           child: PageView.builder(
+                            reverse: true,
                             controller: _controller,
                             onPageChanged: (index) {
                               setState(() {
@@ -186,14 +245,11 @@ class _HomePageState extends State<HomePage> {
                               final data =
                                   _docs[realIndex];
 
-                              final imageUrl =
-                                  data['imageUrl'] as String?;
-
+                              final imageUrl = data['imageUrl'] as String?;
                               final newsId = data['newsId'];
 
-                              // 🔥 ここが超重要（正しい位置）
-                              final isLinkActive =
-                                  data['isActive'] ?? true;
+                              // リンクの有効フラグ
+                              final isLinkActive = data['isActive'] ?? true;
 
                               if (imageUrl == null ||
                                   imageUrl.isEmpty) {
@@ -237,7 +293,9 @@ class _HomePageState extends State<HomePage> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => const MenuPage(),
+                                      builder: (_) => MenuPage(
+                                        selectedLanguageMode: AppLanguage.selectedLanguageMode,
+                                      ),
                                     ),
                                   );
                                 },
