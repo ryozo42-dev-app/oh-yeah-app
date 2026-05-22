@@ -154,9 +154,9 @@ class NewsListPage extends StatelessWidget {
           final docs = snapshot.data!
             ..sort(
               (a, b) =>
-                  (b['createdAt'] ?? '')
+                  (b['createdat'] ?? '')
                       .compareTo(
-                a['createdAt'] ?? '',
+                a['createdat'] ?? '',
               ),
             );
 

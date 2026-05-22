@@ -42,7 +42,9 @@ Future<void> main() async {
   );
 
   await flutterLocalNotificationsPlugin.initialize(
+
     initSettings,
+
     onDidReceiveNotificationResponse: (details) {
 
       final payload = details.payload;
@@ -52,17 +54,30 @@ Future<void> main() async {
 
       if (payload != null && payload.isNotEmpty) {
 
+        navigatorKey.currentState?.pushAndRemoveUntil(
+
+          MaterialPageRoute(
+            builder: (_) => const HomePage(),
+          ),
+
+          (route) => false,
+
+        );
+
         navigatorKey.currentState?.push(
+
           MaterialPageRoute(
             builder: (_) => NewsDetailPage(
               id: payload,
             ),
           ),
+
         );
 
       }
 
     },
+
   );
 
   // 通知許可
@@ -134,12 +149,24 @@ Future<void> main() async {
 
       if (newsId != null) {
 
+        navigatorKey.currentState?.pushAndRemoveUntil(
+
+          MaterialPageRoute(
+            builder: (_) => const HomePage(),
+          ),
+
+          (route) => false,
+
+        );
+
         navigatorKey.currentState?.push(
+
           MaterialPageRoute(
             builder: (_) => NewsDetailPage(
               id: newsId,
             ),
           ),
+
         );
 
       }
@@ -209,11 +236,64 @@ class MyApp extends StatelessWidget {
       ),
 
       home: initialNewsId != null
-          ? NewsDetailPage(
-              id: initialNewsId!,
+
+          ? HomePageWithNotification(
+              newsId: initialNewsId!,
             )
+
           : const SplashPage(),
     );
+  }
+}
+
+class HomePageWithNotification
+    extends StatefulWidget {
+
+  final String newsId;
+
+  const HomePageWithNotification({
+    super.key,
+    required this.newsId,
+  });
+
+  @override
+  State<HomePageWithNotification>
+      createState() =>
+          _HomePageWithNotificationState();
+}
+
+class _HomePageWithNotificationState
+    extends State<HomePageWithNotification> {
+
+  @override
+  void initState() {
+
+    super.initState();
+
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) {
+
+      Navigator.push(
+
+        context,
+
+        MaterialPageRoute(
+          builder: (_) => NewsDetailPage(
+            id: widget.newsId,
+          ),
+        ),
+
+      );
+
+    });
+
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return const HomePage();
+
   }
 }
 
@@ -225,5 +305,6 @@ class AppRoot extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return const HomePage();
+
   }
 }

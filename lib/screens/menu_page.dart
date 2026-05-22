@@ -459,26 +459,29 @@ class _MenuPageState extends State<MenuPage>
           horizontal: 14,
         ),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: const Color(0xFF5C3A2E),
-            width: 2.2,
-          ),
+          color: buttonColor,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 6,
+              offset: Offset(0, 2),
+            ),
+          ],
         ),
         child: DropdownButtonHideUnderline(
           child: DropdownButton<String>(
             value: value,
             isExpanded: true,
-            dropdownColor: Colors.white,
+            dropdownColor: buttonColor,
             icon: const Icon(
               Icons.keyboard_arrow_down,
-              color: Color(0xFF5C3A2E),
+              color: Colors.white,
             ),
             style: const TextStyle(
-              color: Color(0xFF5C3A2E),
+              color: Colors.white,
               fontSize: 15,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.bold,
             ),
             items: categories.map((c) {
               return DropdownMenuItem(

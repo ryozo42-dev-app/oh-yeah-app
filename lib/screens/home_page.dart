@@ -75,11 +75,14 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _openUrl(String url) async {
     final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
+    try {
+      // canLaunchUrlは設定により不正確な場合があるため、直接launchUrlを試みます
       await launchUrl(
         uri,
         mode: LaunchMode.externalApplication,
       );
+    } catch (e) {
+      debugPrint('URLを開けませんでした: $e');
     }
   }
 
@@ -153,7 +156,10 @@ class _HomePageState extends State<HomePage> {
             width: double.infinity,
             height: 200,
             color: headerColor,
-            padding: const EdgeInsets.only(top: 45, bottom: 15),
+            padding: const EdgeInsets.only(
+              top: 45,
+              bottom: 15,
+            ),
             child: Center(
               child: Image.asset(
                 'assets/images/logo.png',
@@ -177,46 +183,78 @@ class _HomePageState extends State<HomePage> {
                             width: 260,
                             padding: const EdgeInsets.symmetric(horizontal: 14),
                             decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: const Color(0xFF5C3A2E),
-                                width: 2,
-                              ),
+                              color: buttonColor,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 6,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
                             ),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
                                 value: AppLanguage.selectedLanguageMode,
                                 isExpanded: true,
-                                dropdownColor: Colors.white,
+                                dropdownColor: buttonColor,
                                 icon: const Icon(
                                   Icons.keyboard_arrow_down,
-                                  color: Color(0xFF5C3A2E),
+                                  color: Colors.white,
                                 ),
                                 style: const TextStyle(
-                                  color: Color(0xFF5C3A2E),
+                                  color: Colors.white,
                                   fontSize: 15,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.bold,
                                 ),
+                                selectedItemBuilder: (BuildContext context) {
+                                  return [
+                                    'western',
+                                    'asian',
+                                  ].map((String mode) {
+                                    return Center(
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(mode == 'western'
+                                              ? '🌍 日本語 / English'
+                                              : '🌍 繁體中文 / 한국어'),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList();
+                                },
                                 items: const [
-
                                   DropdownMenuItem(
                                     value: 'western',
                                     child: Center(
-                                      child: Text('🌐 日本語 / English'),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text('🌍 日本語 / English'),
+                                        ],
+                                      ),
                                     ),
                                   ),
-
                                   DropdownMenuItem(
                                     value: 'asian',
                                     child: Center(
-                                      child: Text('🌐 繁體中文 / 한국어'),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text('🌍 繁體中文 / 한국어'),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ],
                                 onChanged: (value) {
+                                  if (value == null) return;
                                   setState(() {
-                                    AppLanguage.selectedLanguageMode = value!;
+                                    AppLanguage.selectedLanguageMode = value;
                                   });
                                 },
                               ),
@@ -308,7 +346,8 @@ class _HomePageState extends State<HomePage> {
                                 label: "MAP",
                                 onTap: () {
                                   _openUrl(
-                                    'https://www.google.com/maps/search/?api=1&query=沖縄県中頭郡北谷町美浜9-39',
+                                    Uri.encodeFull(
+                                        'https://maps.google.com/?q=Oh Yeah ! 沖縄県中頭郡北谷町美浜9-39 2F'),
                                   );
                                 },
                               ),
