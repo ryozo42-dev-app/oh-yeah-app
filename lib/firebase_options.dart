@@ -41,48 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBaVw1EW3vg3YWI_dMGQl4OANajz3p9O9Q',
-    appId: '1:642657130095:web:2118a92adb2f9e251c9f9a',
-    messagingSenderId: '642657130095',
-    projectId: 'oh-yeah-9fdc6',
-    authDomain: 'oh-yeah-9fdc6.firebaseapp.com',
-    storageBucket: 'oh-yeah-9fdc6.firebasestorage.app',
-    measurementId: 'G-2GS13S6GE5',
+    apiKey: 'AIzaSyD1_rxQHyaW_WdryBJ4n_PhicXQakoumn4',
+    appId: '1:479290647178:web:08c4d4d0d819df21214373',
+    messagingSenderId: '479290647178',
+    projectId: 'oh-yeah-official',
+    authDomain: 'oh-yeah-official.firebaseapp.com',
+    storageBucket: 'oh-yeah-official.firebasestorage.app',
+    measurementId: 'G-P4BGYSDJWK',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDYxooaCGo3WC0Xq96fRcgIw34A9ewewCA',
-    appId: '1:642657130095:android:9bc55e52b7fc502e1c9f9a',
-    messagingSenderId: '642657130095',
-    projectId: 'oh-yeah-9fdc6',
-    storageBucket: 'oh-yeah-9fdc6.firebasestorage.app',
+    apiKey: 'AIzaSyDRTvMnWm5kJc6Fwvmjc54x7WJnecmObw4',
+    appId: '1:479290647178:android:7b751d753e49010a214373',
+    messagingSenderId: '479290647178',
+    projectId: 'oh-yeah-official',
+    storageBucket: 'oh-yeah-official.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDVJEcg-S4giz-1H6OwPoTu8RpGxtTXaPI',
-    appId: '1:642657130095:ios:fe46490983b15e081c9f9a',
-    messagingSenderId: '642657130095',
-    projectId: 'oh-yeah-9fdc6',
-    storageBucket: 'oh-yeah-9fdc6.firebasestorage.app',
+    apiKey: 'AIzaSyCf3Q_nSJQ_spgWhkGqVpmc8faz7oWyzcE',
+    appId: '1:479290647178:ios:3ca8fec28c285274214373',
+    messagingSenderId: '479290647178',
+    projectId: 'oh-yeah-official',
+    storageBucket: 'oh-yeah-official.firebasestorage.app',
     iosBundleId: 'com.ryozo.ohyeah',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDVJEcg-S4giz-1H6OwPoTu8RpGxtTXaPI',
-    appId: '1:642657130095:ios:6dfb498cfdd0eaed1c9f9a',
-    messagingSenderId: '642657130095',
-    projectId: 'oh-yeah-9fdc6',
-    storageBucket: 'oh-yeah-9fdc6.firebasestorage.app',
+    apiKey: 'AIzaSyCf3Q_nSJQ_spgWhkGqVpmc8faz7oWyzcE',
+    appId: '1:479290647178:ios:197bb73f787da8b1214373',
+    messagingSenderId: '479290647178',
+    projectId: 'oh-yeah-official',
+    storageBucket: 'oh-yeah-official.firebasestorage.app',
     iosBundleId: 'com.example.ohYeahNew',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyBaVw1EW3vg3YWI_dMGQl4OANajz3p9O9Q',
-    appId: '1:642657130095:web:2603d41a39aad7901c9f9a',
-    messagingSenderId: '642657130095',
-    projectId: 'oh-yeah-9fdc6',
-    authDomain: 'oh-yeah-9fdc6.firebaseapp.com',
-    storageBucket: 'oh-yeah-9fdc6.firebasestorage.app',
-    measurementId: 'G-MZRCJLLF2L',
+    apiKey: 'AIzaSyD1_rxQHyaW_WdryBJ4n_PhicXQakoumn4',
+    appId: '1:479290647178:web:b4868d7c88abcf48214373',
+    messagingSenderId: '479290647178',
+    projectId: 'oh-yeah-official',
+    authDomain: 'oh-yeah-official.firebaseapp.com',
+    storageBucket: 'oh-yeah-official.firebasestorage.app',
+    measurementId: 'G-BZ7JLJB5BL',
   );
+
 }

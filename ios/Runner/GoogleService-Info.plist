@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyDVJEcg-S4giz-1H6OwPoTu8RpGxtTXaPI</string>
+	<string>AIzaSyCf3Q_nSJQ_spgWhkGqVpmc8faz7oWyzcE</string>
 	<key>GCM_SENDER_ID</key>
-	<string>642657130095</string>
+	<string>479290647178</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.ryozo.ohyeahapp</string>
 	<key>PROJECT_ID</key>
-	<string>oh-yeah-9fdc6</string>
+	<string>oh-yeah-official</string>
 	<key>STORAGE_BUCKET</key>
-	<string>oh-yeah-9fdc6.firebasestorage.app</string>
+	<string>oh-yeah-official.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:642657130095:ios:9307d72791086ad71c9f9a</string>
+	<string>1:479290647178:ios:914fdd5013a81f1e214373</string>
 </dict>
 </plist>

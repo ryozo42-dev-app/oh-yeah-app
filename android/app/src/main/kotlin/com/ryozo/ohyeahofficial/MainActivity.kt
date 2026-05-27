@@ -1,4 +1,4 @@
-package com.example.oh_yeah
+package com.ryozo.ohyeahofficial
 
 import io.flutter.embedding.android.FlutterActivity
 

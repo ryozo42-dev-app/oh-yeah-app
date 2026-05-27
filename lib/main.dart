@@ -1,75 +1,120 @@
-import 'package:flutter/material.dart' hide CarouselController;
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/material.dart';
+
+import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
+
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 import 'package:oh_yeah/screens/splash_page.dart';
+
+import 'package:oh_yeah/screens/news_detail_page.dart';
 
 import 'firebase_options.dart';
 
-import 'package:oh_yeah/screens/news_detail_page.dart';
-import 'package:oh_yeah/screens/home_page.dart';
-
-final GlobalKey<NavigatorState> navigatorKey =
+final GlobalKey<NavigatorState>
+    navigatorKey =
     GlobalKey<NavigatorState>();
 
 final FlutterLocalNotificationsPlugin
     flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
+const AndroidNotificationChannel
+    channel =
+    AndroidNotificationChannel(
+
+  'high_importance_channel',
+
+  'High Importance Notifications',
+
+  importance: Importance.high,
+
+);
+
 Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  String? initialNewsId;
+  // Supabase
+  await Supabase.initialize(
 
-  // Firebase 初期化
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+    url:
+        'https://ikezocnvlrhluxhxwfug.supabase.co',
+
+    anonKey:
+        'sb_publishable_Li_R5pqWubw4taEHevrYSA_IKDg42uQ',
+
   );
+
+  // Firebase
+  await Firebase.initializeApp(
+
+    options:
+        DefaultFirebaseOptions.currentPlatform,
+
+  );
+
+  // 通知チャンネル作成
+  await flutterLocalNotificationsPlugin
+
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+
+      ?.createNotificationChannel(
+        channel,
+      );
 
   // local notification 初期化
-  const DarwinInitializationSettings iosSettings =
+  const DarwinInitializationSettings
+      iosSettings =
       DarwinInitializationSettings();
 
-  const AndroidInitializationSettings androidSettings =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
-
-  const InitializationSettings initSettings =
-      InitializationSettings(
-    iOS: iosSettings,
-    android: androidSettings,
+  const AndroidInitializationSettings
+      androidSettings =
+      AndroidInitializationSettings(
+    '@mipmap/ic_launcher',
   );
 
-  await flutterLocalNotificationsPlugin.initialize(
+  const InitializationSettings
+      initSettings =
+      InitializationSettings(
+
+    iOS: iosSettings,
+
+    android: androidSettings,
+
+  );
+
+  await flutterLocalNotificationsPlugin
+      .initialize(
 
     initSettings,
 
-    onDidReceiveNotificationResponse: (details) {
+    onDidReceiveNotificationResponse:
+        (details) {
 
-      final payload = details.payload;
+      final payload =
+          details.payload;
 
-      debugPrint("LOCAL PAYLOAD:");
-      debugPrint(payload);
+      if (payload != null &&
+          payload.isNotEmpty) {
 
-      if (payload != null && payload.isNotEmpty) {
-
-        navigatorKey.currentState?.pushAndRemoveUntil(
-
-          MaterialPageRoute(
-            builder: (_) => const HomePage(),
-          ),
-
-          (route) => false,
-
-        );
-
-        navigatorKey.currentState?.push(
+        navigatorKey.currentState
+            ?.push(
 
           MaterialPageRoute(
-            builder: (_) => NewsDetailPage(
+
+            builder:
+                (_) =>
+                    NewsDetailPage(
               id: payload,
             ),
+
           ),
 
         );
@@ -81,90 +126,110 @@ Future<void> main() async {
   );
 
   // 通知許可
-  await FirebaseMessaging.instance.requestPermission(
+  await FirebaseMessaging.instance
+      .requestPermission(
+
     alert: true,
+
     badge: true,
+
     sound: true,
+
   );
 
-  // APNs token 発行待ち
-  await Future.delayed(const Duration(seconds: 5));
+  // APNS TOKEN
+  if (Platform.isIOS) {
+    final apnsToken =
+        await FirebaseMessaging.instance
+            .getAPNSToken();
 
-  final apnsToken =
-      await FirebaseMessaging.instance.getAPNSToken();
+    debugPrint("APNS TOKEN:");
 
-  debugPrint("APNS TOKEN:");
-  debugPrint(apnsToken);
+    debugPrint(
+      apnsToken ?? "NULL",
+    );
+  }
 
+  // FCM TOKEN取得
   final fcmToken =
-      await FirebaseMessaging.instance.getToken();
+      await FirebaseMessaging.instance
+          .getToken();
 
   debugPrint("FCM TOKEN:");
+
   debugPrint(fcmToken);
 
-  await FirebaseMessaging.instance.subscribeToTopic("news");
-
-  debugPrint("TOPIC SUBSCRIBE SUCCESS");
-
-  // Supabase 初期化
-  await Supabase.initialize(
-    url: 'https://ikezocnvlrhluxhxwfug.supabase.co',
-    anonKey:
-        'sb_publishable_Li_R5pqWubw4taEHevrYSA_IKDg42uQ',
+  // Topic解除
+  await FirebaseMessaging.instance
+      .unsubscribeFromTopic(
+    "news",
   );
 
-  // 完全終了状態通知取得
+  // Topic再登録
+  await FirebaseMessaging.instance
+      .subscribeToTopic(
+    "news",
+  );
+
+  debugPrint(
+    "TOPIC RE-SUBSCRIBE SUCCESS",
+  );
+
+  // 完全終了通知
   final initialMessage =
-      await FirebaseMessaging.instance.getInitialMessage();
+      await FirebaseMessaging.instance
+          .getInitialMessage();
 
   if (initialMessage != null) {
 
-    debugPrint("INITIAL MESSAGE:");
-    debugPrint(initialMessage.data.toString());
+    final newsId =
+        initialMessage
+            .data['newsId'];
 
-    initialNewsId =
-        initialMessage.data['newsId'];
+    if (newsId != null) {
 
-    debugPrint("INITIAL NEWS ID:");
-    debugPrint(initialNewsId);
+      navigatorKey.currentState
+          ?.push(
 
-  } else {
+        MaterialPageRoute(
 
-    debugPrint("INITIAL MESSAGE NULL");
+          builder:
+              (_) =>
+                  NewsDetailPage(
+            id: newsId,
+          ),
+
+        ),
+
+      );
+
+    }
 
   }
 
-  // バックグラウンド通知タップ
-  FirebaseMessaging.onMessageOpenedApp.listen(
-    (RemoteMessage message) {
+  // バックグラウンド通知
+  FirebaseMessaging
+      .onMessageOpenedApp
+      .listen(
 
-      debugPrint("BACKGROUND MESSAGE:");
-      debugPrint(message.data.toString());
+    (RemoteMessage message) {
 
       final newsId =
           message.data['newsId'];
 
-      debugPrint("BACKGROUND NEWS ID:");
-      debugPrint(newsId.toString());
-
       if (newsId != null) {
 
-        navigatorKey.currentState?.pushAndRemoveUntil(
+        navigatorKey.currentState
+            ?.push(
 
           MaterialPageRoute(
-            builder: (_) => const HomePage(),
-          ),
 
-          (route) => false,
-
-        );
-
-        navigatorKey.currentState?.push(
-
-          MaterialPageRoute(
-            builder: (_) => NewsDetailPage(
+            builder:
+                (_) =>
+                    NewsDetailPage(
               id: newsId,
             ),
+
           ),
 
         );
@@ -172,139 +237,89 @@ Future<void> main() async {
       }
 
     },
+
   );
 
   // フォアグラウンド通知
-  FirebaseMessaging.onMessage.listen(
-    (RemoteMessage message) async {
+  FirebaseMessaging.onMessage
+      .listen(
 
-      debugPrint("FOREGROUND MESSAGE:");
-      debugPrint(message.data.toString());
+    (RemoteMessage message) async {
 
       final newsId =
           message.data['newsId'];
 
-      await flutterLocalNotificationsPlugin.show(
+      await flutterLocalNotificationsPlugin
+          .show(
+
         0,
-        message.notification?.title ?? "",
-        message.notification?.body ?? "",
-        const NotificationDetails(
-          iOS: DarwinNotificationDetails(),
-          android: AndroidNotificationDetails(
-            'default',
-            'default',
-            importance: Importance.max,
-            priority: Priority.high,
+
+        message.notification
+                ?.title ??
+            "",
+
+        message.notification
+                ?.body ??
+            "",
+
+        NotificationDetails(
+
+          iOS:
+              const DarwinNotificationDetails(),
+
+          android:
+              AndroidNotificationDetails(
+
+            channel.id,
+
+            channel.name,
+
+            importance:
+                Importance.max,
+
+            priority:
+                Priority.high,
+
           ),
+
         ),
+
         payload: newsId,
+
       );
 
     },
+
   );
 
   runApp(
-    MyApp(
-      initialNewsId: initialNewsId,
-    ),
+    const MyApp(),
   );
 
 }
 
-class MyApp extends StatelessWidget {
+class MyApp
+    extends StatelessWidget {
 
-  final String? initialNewsId;
-
-  const MyApp({
-    super.key,
-    this.initialNewsId,
-  });
+  const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+    BuildContext context,
+  ) {
 
     return MaterialApp(
 
-      navigatorKey: navigatorKey,
+      navigatorKey:
+          navigatorKey,
 
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner:
+          false,
 
-      title: 'Oh Yeah',
+      home: const SplashPage(),
 
-      theme: ThemeData(
-        primarySwatch: Colors.brown,
-      ),
-
-      home: initialNewsId != null
-
-          ? HomePageWithNotification(
-              newsId: initialNewsId!,
-            )
-
-          : const SplashPage(),
     );
-  }
-}
-
-class HomePageWithNotification
-    extends StatefulWidget {
-
-  final String newsId;
-
-  const HomePageWithNotification({
-    super.key,
-    required this.newsId,
-  });
-
-  @override
-  State<HomePageWithNotification>
-      createState() =>
-          _HomePageWithNotificationState();
-}
-
-class _HomePageWithNotificationState
-    extends State<HomePageWithNotification> {
-
-  @override
-  void initState() {
-
-    super.initState();
-
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) {
-
-      Navigator.push(
-
-        context,
-
-        MaterialPageRoute(
-          builder: (_) => NewsDetailPage(
-            id: widget.newsId,
-          ),
-        ),
-
-      );
-
-    });
 
   }
 
-  @override
-  Widget build(BuildContext context) {
-
-    return const HomePage();
-
-  }
-}
-
-class AppRoot extends StatelessWidget {
-
-  const AppRoot({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-
-    return const HomePage();
-
-  }
 }
