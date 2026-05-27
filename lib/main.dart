@@ -126,15 +126,16 @@ Future<void> main() async {
   );
 
   // 通知許可
-  await FirebaseMessaging.instance
-      .requestPermission(
-
+  final settings =
+      await FirebaseMessaging.instance
+          .requestPermission(
     alert: true,
-
     badge: true,
-
     sound: true,
+  );
 
+  debugPrint(
+    "PERMISSION: ${settings.authorizationStatus}"
   );
 
   // APNS TOKEN
@@ -158,6 +159,16 @@ Future<void> main() async {
   debugPrint("FCM TOKEN:");
 
   debugPrint(fcmToken);
+
+  await FirebaseMessaging.instance
+      .deleteToken();
+
+  final newToken =
+      await FirebaseMessaging.instance
+          .getToken();
+
+  debugPrint("NEW FCM TOKEN:");
+  debugPrint(newToken);
 
   // Topic解除
   await FirebaseMessaging.instance
