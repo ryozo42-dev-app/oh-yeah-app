@@ -485,7 +485,7 @@
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = com.ryozo.ohyeah;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ryozo.ohyeahofficial;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -506,12 +506,13 @@
 				DEVELOPMENT_TEAM = A47X9VKPTC;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.ryozo.ohyeahofficial;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ryozo.ohyeahapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ryozo.ohyeahofficial;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -623,7 +624,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.ryozo.ohyeah;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ryozo.ohyeahofficial;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -675,7 +676,7 @@
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = com.ryozo.ohyeah;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ryozo.ohyeahofficial;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -698,12 +699,13 @@
 				DEVELOPMENT_TEAM = A47X9VKPTC;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.ryozo.ohyeahofficial;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ryozo.ohyeahapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ryozo.ohyeahofficial;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -726,12 +728,13 @@
 				DEVELOPMENT_TEAM = A47X9VKPTC;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.ryozo.ohyeahofficial;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ryozo.ohyeahapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ryozo.ohyeahofficial;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
