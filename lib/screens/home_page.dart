@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -25,6 +26,8 @@ class _HomePageState
     extends State<HomePage> {
 
   int _current = 0;
+
+  bool hasUnreadNews = false;
 
   final PageController _controller =
       PageController(
@@ -51,6 +54,8 @@ class _HomePageState
     super.initState();
 
     _fetchSliderImages();
+
+    _checkUnreadNews();
 
     _startAutoSlide();
 
@@ -90,6 +95,70 @@ class _HomePageState
 
       debugPrint(
         e.toString(),
+      );
+
+    }
+
+  }
+
+  Future<void> _checkUnreadNews() async {
+
+    try {
+
+      final prefs =
+          await SharedPreferences.getInstance();
+
+      final lastRead =
+          prefs.getString('last_news_read_at');
+
+      final latestNews = await supabase
+          .from('world_news')
+          .select('createdat')
+          .order('createdat',
+              ascending: false)
+          .limit(1)
+          .single();
+
+      final String? latestCreatedAt =
+          latestNews['createdat'];
+
+      if (latestCreatedAt != null) {
+
+        setState(() {
+
+          if (lastRead == null) {
+
+            hasUnreadNews = true;
+
+          } else {
+
+            final latest =
+                DateTime.parse(
+              latestCreatedAt,
+            );
+
+            final read =
+                DateTime.parse(
+              lastRead,
+            );
+
+            hasUnreadNews =
+                latest.isAfter(read);
+
+          }
+
+        });
+
+      }
+
+      debugPrint(
+        "CHECK NEWS: $latestNews",
+      );
+
+    } catch (e) {
+
+      debugPrint(
+        "CHECK NEWS ERROR: $e",
       );
 
     }
@@ -224,9 +293,25 @@ class _HomePageState
 
                 label: "NEWS",
 
-                onTap: () {
+                showBadge: hasUnreadNews,
 
-                  Navigator.push(
+                onTap: () async {
+
+                  final prefs =
+                      await SharedPreferences.getInstance();
+
+                  await prefs.setString(
+                    'last_news_read_at',
+                    DateTime.now().toIso8601String(),
+                  );
+
+                  setState(() {
+                    hasUnreadNews = false;
+                  });
+
+                  if (!context.mounted) return;
+
+                  await Navigator.push(
 
                     context,
 
@@ -766,6 +851,8 @@ class _HomePageState
 
     bool isActive = false,
 
+    bool showBadge = false,
+
   }) {
 
     return Expanded(
@@ -781,13 +868,49 @@ class _HomePageState
 
           children: [
 
-            Icon(
+            Stack(
 
-              icon,
+              clipBehavior: Clip.none,
 
-              size: 30,
+              children: [
 
-              color: Colors.white,
+                Icon(
+
+                  icon,
+
+                  size: 30,
+
+                  color: Colors.white,
+
+                ),
+
+                if (showBadge)
+
+                  Positioned(
+
+                    right: -2,
+
+                    top: -2,
+
+                    child: Container(
+
+                      width: 10,
+
+                      height: 10,
+
+                      decoration: const BoxDecoration(
+
+                        color: Colors.red,
+
+                        shape: BoxShape.circle,
+
+                      ),
+
+                    ),
+
+                  ),
+
+              ],
 
             ),
 

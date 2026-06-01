@@ -21,6 +21,7 @@ class _MenuPageState extends State<MenuPage>
 
   final NumberFormat formatter = NumberFormat('#,###');
   final supabase = Supabase.instance.client;
+  RealtimeChannel? menuChannel;
 
   late TabController _tabController;
 
@@ -48,6 +49,34 @@ class _MenuPageState extends State<MenuPage>
 
     loadDrinks();
     loadFoods();
+
+    menuChannel = supabase.channel('menu-realtime');
+
+    menuChannel!
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'world_drinks',
+          callback: (payload) async {
+
+            if (!mounted) return;
+
+            await loadDrinks();
+          },
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'world_foods',
+          callback: (payload) async {
+
+            if (!mounted) return;
+
+            await loadFoods();
+          },
+        )
+        .subscribe((status, error) {
+        });
   }
 
   // =========================
@@ -77,34 +106,11 @@ class _MenuPageState extends State<MenuPage>
         .where((e) => e != 'ALL')
         .toList();
 
-    final orderMap = <String, int>{};
-    for (final item in categoryData) {
-      orderMap[item['name'].toString().toLowerCase()] =
-          item['display_order'] ?? 999;
-    }
-
     data.sort((a, b) {
-      final categoryA = orderMap[a['drinkcategory']
-                  ?.toString()
-                  .toLowerCase()] ??
-          999;
-
-      final categoryB = orderMap[b['drinkcategory']
-                  ?.toString()
-                  .toLowerCase()] ??
-          999;
-
       // display_order順
-      if (categoryA != categoryB) {
-        return categoryA.compareTo(categoryB);
-      }
-
-      // 名前順
-      return (a['name_ja'] ?? '')
-          .toString()
+      return (a['display_order'] ?? 9999)
           .compareTo(
-            (b['name_ja'] ?? '')
-                .toString(),
+            b['display_order'] ?? 9999,
           );
     });
 
@@ -154,45 +160,11 @@ class _MenuPageState extends State<MenuPage>
         .where((e) => e != 'ALL')
         .toList();
 
-    final orderMap = <String, int>{};
-    for (final item in categoryData) {
-      orderMap[item['name'].toString().toLowerCase()] =
-          item['display_order'] ?? 999;
-    }
-
     data.sort((a, b) {
-      final categoryA = orderMap[a['foodcategory']
-                  ?.toString()
-                  .toLowerCase()] ??
-          999;
-
-      final categoryB = orderMap[b['foodcategory']
-                  ?.toString()
-                  .toLowerCase()] ??
-          999;
-
       // display_order順
-      if (categoryA != categoryB) {
-        return categoryA.compareTo(categoryB);
-      }
-
-      // 名前順
-      final nameCompare =
-          (a['name_ja'] ?? '')
-              .toString()
-              .compareTo(
-                (b['name_ja'] ?? '')
-                    .toString(),
-              );
-
-      if (nameCompare != 0) {
-        return nameCompare;
-      }
-
-      // 価格順
-      return (a['price'] ?? 0)
+      return (a['display_order'] ?? 9999)
           .compareTo(
-            b['price'] ?? 0,
+            b['display_order'] ?? 9999,
           );
     });
 
@@ -213,6 +185,13 @@ class _MenuPageState extends State<MenuPage>
         }
       });
     }
+  }
+
+  Future<void> refreshMenu() async {
+    await Future.wait([
+      loadDrinks(),
+      loadFoods(),
+    ]);
   }
 
   // =========================
@@ -251,6 +230,13 @@ class _MenuPageState extends State<MenuPage>
               .toLowerCase();
 
     }).toList();
+  }
+
+  @override
+  void dispose() {
+    menuChannel?.unsubscribe();
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
@@ -361,81 +347,57 @@ class _MenuPageState extends State<MenuPage>
 
       body: TabBarView(
         controller: _tabController,
-
         children: [
-
           // =====================
           // DRINK
           // =====================
-
-          Column(
-            children: [
-
-              const SizedBox(height: 10),
-
-              _categoryDropdown(
-                categories: drinkCategories,
-                value: selectedDrinkCategory,
-                onChanged: (value) {
-                  setState(() {
-                    selectedDrinkCategory = value!;
-                  });
-                },
-              ),
-
-              const SizedBox(height: 10),
-
-              Expanded(
-                child: ListView.builder(
-                  itemCount: filteredDrinks.length,
-
-                  itemBuilder: (context, index) {
-
-                    final item =
-                        filteredDrinks[index];
-
-                    return _drinkCard(item);
+          RefreshIndicator(
+            onRefresh: refreshMenu,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                const SizedBox(height: 10),
+                _categoryDropdown(
+                  categories: drinkCategories,
+                  value: selectedDrinkCategory,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedDrinkCategory = value!;
+                    });
                   },
                 ),
-              ),
-            ],
+                const SizedBox(height: 10),
+                ...filteredDrinks.map(
+                  (item) => _drinkCard(item),
+                ),
+              ],
+            ),
           ),
 
           // =====================
           // FOOD
           // =====================
-
-          Column(
-            children: [
-
-              const SizedBox(height: 10),
-
-              _categoryDropdown(
-                categories: foodCategories,
-                value: selectedFoodCategory,
-                onChanged: (value) {
-                  setState(() {
-                    selectedFoodCategory = value!;
-                  });
-                },
-              ),
-
-              const SizedBox(height: 10),
-
-              Expanded(
-                child: ListView.builder(
-                  itemCount: filteredFoods.length,
-
-                  itemBuilder: (context, index) {
-
-                    final item =
-                        filteredFoods[index];
-
-                    return _foodCard(item);
+          RefreshIndicator(
+            onRefresh: refreshMenu,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                const SizedBox(height: 10),
+                _categoryDropdown(
+                  categories: foodCategories,
+                  value: selectedFoodCategory,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedFoodCategory = value!;
+                    });
                   },
                 ),
-              ),
-            ],
+                const SizedBox(height: 10),
+                ...filteredFoods.map(
+                  (item) => _foodCard(item),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -557,22 +519,35 @@ class _MenuPageState extends State<MenuPage>
                   ),
                 ],
                 if (AppLanguage.selectedLanguageMode == 'asian') ...[
-                  // Chinese name
+                  Text(
+                    item['name_ja'] ?? '',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+
+                  const SizedBox(height: 2),
+
                   Text(
                     item['name_zh'] ?? '',
                     style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
                   ),
-                  const SizedBox(height: 4),
-                  // Korean name
+
+                  const SizedBox(height: 2),
+
                   Text(
                     item['name_ko'] ?? '',
                     style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
                   ),
                 ],
                 const SizedBox(height: 6),
@@ -580,14 +555,22 @@ class _MenuPageState extends State<MenuPage>
                     style: const TextStyle(
                       color: Colors.black,
                       fontSize: 13,
-                    )),
+                    ),
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: Text(
+                    '¥${formatter.format(item['price'] ?? 0)}',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
               ],
             ),
-          ),
-          Text(
-            '¥${formatter.format(item['price'] ?? 0)}',
-            style: const TextStyle(
-              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
           ),
         ],
       ),
@@ -672,21 +655,32 @@ class _MenuPageState extends State<MenuPage>
                     ),
                   ],
                   if (AppLanguage.selectedLanguageMode == 'asian') ...[
-                    // Chinese name
                     Text(
-                      item['name_zh'] ?? '',
+                      item['name_ja'] ?? '',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    // Korean name
+
+                    const SizedBox(height: 2),
+
+                    Text(
+                      item['name_zh'] ?? '',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+
+                    const SizedBox(height: 2),
+
                     Text(
                       item['name_ko'] ?? '',
                       style: const TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -701,16 +695,19 @@ class _MenuPageState extends State<MenuPage>
                       color: Colors.black,
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Text(
+                      '¥${formatter.format(item['price'] ?? 0)}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
                 ],
-              ),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              '¥${formatter.format(item['price'] ?? 0)}',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
               ),
             ),
           ],

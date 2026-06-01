@@ -166,22 +166,37 @@ class FoodDetailPage extends StatelessWidget {
                   ],
                   if (AppLanguage.selectedLanguageMode == 'asian') ...[
                     Text(
-                      data['name_zh'] ?? '', // Chinese name
+                      data['name_ja'] ?? '',
                       style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
                     ),
-                    const SizedBox(height: 8),
+
+                    const SizedBox(height: 6),
+
                     Text(
-                      data['name_ko'] ?? '', // Korean name
+                      data['name_zh'] ?? '',
                       style: const TextStyle(
-                        fontSize: 28,
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
                     ),
+
+                    const SizedBox(height: 6),
+
+                    Text(
+                      data['name_ko'] ?? '',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
                   ],
                   Text(
                     data['description'] ?? '',
