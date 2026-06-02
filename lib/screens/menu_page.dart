@@ -106,13 +106,38 @@ class _MenuPageState extends State<MenuPage>
         .where((e) => e != 'ALL')
         .toList();
 
+    final categoryOrder = categoryData
+        .map((e) => e['name'].toString())
+        .toList();
+
     data.sort((a, b) {
-      // display_order順
+      final idxA = categoryOrder.indexOf(
+        a['drinkcategory']?.toString() ?? '',
+      );
+
+      final idxB = categoryOrder.indexOf(
+        b['drinkcategory']?.toString() ?? '',
+      );
+
+      if (idxA != idxB) {
+        return idxA.compareTo(idxB);
+      }
+
       return (a['display_order'] ?? 9999)
           .compareTo(
             b['display_order'] ?? 9999,
           );
     });
+
+    print("========== SORT CHECK ==========");
+
+    for (final d in data.take(20)) {
+      print(
+        "${d['drinkcategory']} "
+        "${d['display_order']} "
+        "${d['name_ja']}",
+      );
+    }
 
     if (mounted) {
       setState(() {
