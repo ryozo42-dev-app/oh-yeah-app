@@ -67,7 +67,32 @@ class _MenuPageState extends State<MenuPage>
         .onPostgresChanges(
           event: PostgresChangeEvent.all,
           schema: 'public',
+          table: 'drink_categories',
+          callback: (payload) async {
+
+            print("drink_categories changed");
+            print(payload);
+
+            if (!mounted) return;
+
+            await loadDrinks();
+          },
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
           table: 'world_foods',
+          callback: (payload) async {
+
+            if (!mounted) return;
+
+            await loadFoods();
+          },
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'food_categories',
           callback: (payload) async {
 
             if (!mounted) return;
@@ -84,6 +109,7 @@ class _MenuPageState extends State<MenuPage>
   // =========================
 
   Future<void> loadDrinks() async {
+    print("loadDrinks called");
 
     final categoryData = await supabase
         .from('drink_categories')
@@ -128,16 +154,6 @@ class _MenuPageState extends State<MenuPage>
             b['display_order'] ?? 9999,
           );
     });
-
-    print("========== SORT CHECK ==========");
-
-    for (final d in data.take(20)) {
-      print(
-        "${d['drinkcategory']} "
-        "${d['display_order']} "
-        "${d['name_ja']}",
-      );
-    }
 
     if (mounted) {
       setState(() {
@@ -186,7 +202,19 @@ class _MenuPageState extends State<MenuPage>
         .toList();
 
     data.sort((a, b) {
-      // display_order順
+
+      final idxA = categories.indexOf(
+        a['foodcategory'] ?? '',
+      );
+
+      final idxB = categories.indexOf(
+        b['foodcategory'] ?? '',
+      );
+
+      if (idxA != idxB) {
+        return idxA.compareTo(idxB);
+      }
+
       return (a['display_order'] ?? 9999)
           .compareTo(
             b['display_order'] ?? 9999,
