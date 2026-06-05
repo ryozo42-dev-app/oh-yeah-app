@@ -20,6 +20,10 @@ final GlobalKey<NavigatorState>
     navigatorKey =
     GlobalKey<NavigatorState>();
 
+final RouteObserver<ModalRoute<void>>
+    routeObserver =
+        RouteObserver<ModalRoute<void>>();
+
 final FlutterLocalNotificationsPlugin
     flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -323,6 +327,10 @@ class MyApp
 
       navigatorKey:
           navigatorKey,
+
+      navigatorObservers: [
+        routeObserver,
+      ],
 
       debugShowCheckedModeBanner:
           false,

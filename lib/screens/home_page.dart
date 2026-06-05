@@ -11,6 +11,7 @@ import 'package:oh_yeah/screens/menu_page.dart';
 import 'package:oh_yeah/screens/news_detail_page.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:oh_yeah/app_language.dart';
+import 'package:oh_yeah/main.dart';
 
 class HomePage extends StatefulWidget {
 
@@ -23,7 +24,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState
-    extends State<HomePage> {
+    extends State<HomePage>
+    with RouteAware {
 
   int _current = 0;
 
@@ -58,6 +60,18 @@ class _HomePageState
     _checkUnreadNews();
 
     _startAutoSlide();
+
+  }
+
+  @override
+  void didChangeDependencies() {
+
+    super.didChangeDependencies();
+
+    routeObserver.subscribe(
+      this,
+      ModalRoute.of(context)!,
+    );
 
   }
 
@@ -230,6 +244,16 @@ class _HomePageState
 
     }
 
+  }
+
+  @override
+  void didPopNext() {
+    _fetchSliderImages();
+    _checkUnreadNews();
+
+    debugPrint(
+      "HOME RETURN -> RELOAD",
+    );
   }
 
   @override
@@ -943,6 +967,17 @@ class _HomePageState
       ),
 
     );
+
+  }
+
+  @override
+  void dispose() {
+
+    routeObserver.unsubscribe(this);
+
+    _controller.dispose();
+
+    super.dispose();
 
   }
 
