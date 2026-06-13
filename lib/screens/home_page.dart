@@ -31,10 +31,7 @@ class _HomePageState
 
   bool hasUnreadNews = false;
 
-  final PageController _controller =
-      PageController(
-    viewportFraction: 0.85,
-  );
+  late final PageController _controller;
 
   final supabase =
       Supabase.instance.client;
@@ -54,6 +51,11 @@ class _HomePageState
   void initState() {
 
     super.initState();
+
+    _controller = PageController(
+      viewportFraction: 0.85,
+      initialPage: 5000,
+    );
 
     _fetchSliderImages();
 
@@ -198,10 +200,9 @@ class _HomePageState
         if (_docs.isEmpty) return;
 
         final nextPage =
-            _current + 1;
+            _controller.page!.round() + 1;
 
-        if (_controller.hasClients &&
-            nextPage < _docs.length) {
+        if (_controller.hasClients) {
           _controller.animateToPage(
             nextPage,
             duration:
@@ -212,8 +213,6 @@ class _HomePageState
             curve:
                 Curves.easeInOut,
           );
-        } else {
-          _controller.jumpToPage(0);
         }
       },
     );
@@ -587,13 +586,12 @@ class _HomePageState
                               child:
                                   PageView.builder(
 
-                                reverse: true,
+                                reverse: false,
 
                                 controller:
                                     _controller,
 
-                                itemCount:
-                                    _docs.length,
+                                itemCount: 100000,
 
                                 onPageChanged:
                                     (index) {
@@ -601,7 +599,7 @@ class _HomePageState
                                   setState(() {
 
                                     _current =
-                                        index;
+                                        index % _docs.length;
 
                                   });
 
@@ -613,8 +611,11 @@ class _HomePageState
                                   index,
                                 ) {
 
+                                  final realIndex =
+                                      index % _docs.length;
+
                                   final data =
-                                      _docs[index];
+                                      _docs[realIndex];
 
                                   final imageUrl =
                                       data['imageUrl']
@@ -666,6 +667,9 @@ class _HomePageState
 
                               count:
                                   _docs.length,
+
+                              textDirection:
+                                  TextDirection.rtl,
 
                               effect:
                                   WormEffect(
