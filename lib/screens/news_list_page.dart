@@ -162,12 +162,16 @@ class NewsListPage extends StatelessWidget {
 
           if (docs.isEmpty) {
             return const Center(
-              child: Text(
-                "ニュースなし",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight:
-                      FontWeight.bold,
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Text(
+                  '新しいお知らせはありません。',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF212121),
+                  ),
                 ),
               ),
             );
